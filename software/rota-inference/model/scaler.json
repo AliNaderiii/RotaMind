@@ -1,0 +1,10 @@
+{
+  "mean": 0.023,
+  "std": 0.87,
+  "fs": 12800,
+  "window": 2048,
+  "classes": ["Normal", "Outer", "Inner", "Ball", "Cage"],
+  "bearing": "6205",
+  "rpm_range": [900, 3600],
+  "note": "Scaler from train only (leakage-safe) — see PhyQ-Bearing docs/PROTOCOLS.md"
+}

@@ -1,0 +1,17 @@
+NO,Category,Part Number,Description,Spec,Qty,Unit Price (Toman),Supplier,Alternative,Notes
+1,MCU,ESP32-S3-WROOM-1-N8R2,Microcontroller,WiFi/BLE 5.0 240MHz 8MB Flash,1,450000,Afaz Electronic,ESP32-WROOM-32,Main MCU - S3 has USB-OTG
+2,Accelerometer,ADXL345BCCZ,3-Axis MEMS Accelerometer,±16g 13-bit 3.2kHz BW,1,380000,Robotic Shiraz,ADXL335,Or MPU6050 - I2C 0x53
+3,Temp Sensor,DS18B20+,Digital Temp Sensor,-55 to +125C ±0.5C,1,95000,Local,NTC 10K,1-Wire GPIO4
+4,Memory,SD Card 32GB,MicroSD Card,Class 10 32GB,1,320000,DigiKala,-,SanDisk/Kingston
+5,Battery,LiPo 803040,Battery,3.7V 1000mAh JST,1,280000,Battery Shop,18650,With protection circuit
+6,Charger,TP4056,Charger IC,1A Linear Charger,1,45000,Electronic724,MCP73831,With DW01 protection
+7,PCB,RotaTag PCB V1.0,PCB,2-Layer 50x40mm FR4,1,180000,PCBWay,JLCPCB,Lead time 7 days
+8,Enclosure,Alu Case 60x40x22,CNC Case,6061 Anodized,1,650000,Local Workshop,3D PETG Print,IP54 with gasket
+9,Magnet,N52 20x10x3,Neodymium Magnet,N52 Nickel Coated,1,120000,Magnet Shop,-,M3 screw hole
+10,Connectors,USB-C 6P + JST 2P,Connectors,USB-C Female + JST-PH,1,90000,Local,-,For charge/data
+11,Passives,0603 Kit,Res/Cap Kit,10k 4.7k 100nF etc,1,80000,Local,-,For pullups/decoupling
+12,LED,WS2812B-Mini,RGB LED,Addressable RGB,1,35000,Local,0603 LED,Status indicator
+13,Button,TS-1187A,Tact Switch,6x6mm SMD,1,15000,Local,-,BOOT button
+14,Cable,USB-C Cable,Cable,USB-C to USB-A 1m,1,75000,DigiKala,-,Data+Charge
+15,Assembly,Labor,Assembly,Hand Solder + Test,1,150000,Local,-,Per unit
+TOTAL,,,,,,1,2565000,,,Plus 15% overhead = 2950000 Toman
