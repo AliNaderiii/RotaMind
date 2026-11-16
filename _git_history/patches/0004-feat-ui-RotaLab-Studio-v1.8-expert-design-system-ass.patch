@@ -1,0 +1,620 @@
+From f22dd85460ad89c7c46386a92ed1f7c543f1e431 Mon Sep 17 00:00:00 2001
+From: Ali Naderi <ali@rotamind.ir>
+Date: Tue, 10 Nov 2026 13:59:18 +0000
+Subject: [PATCH 04/27] =?UTF-8?q?feat(ui):=20RotaLab=20Studio=20v1.8=20?=
+ =?UTF-8?q?=E2=80=94=20expert=20design=20system,=20asset=20hierarchy,=20wa?=
+ =?UTF-8?q?terfall/cepstrum,=20kurtogram,=20statusbar,=20no=20childish?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ software/rotaviewer/index.html | 490 ++++++++++++++++++++++-----------
+ 1 file changed, 327 insertions(+), 163 deletions(-)
+
+diff --git a/software/rotaviewer/index.html b/software/rotaviewer/index.html
+index 59921b4..6da77b4 100644
+--- a/software/rotaviewer/index.html
++++ b/software/rotaviewer/index.html
+@@ -3,138 +3,327 @@
+ <head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+-<title>RotaLab Pro v1.7 Expert</title>
+-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
++<title>RotaLab Studio — Professional Vibration Analysis</title>
++<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans:wght@500&display=swap" rel="stylesheet">
+ <style>
+-:root{--bg:#080f1e;--panel:#0d1b2f;--card:#12243e;--card2:#0e1e36;--border:#1a3458;--border2:#1e3a62;--text:#e2eaf6;--muted:#8aa0c0;--dim:#5b7394;--accent:#0ea5e9;--accent2:#38bdf8;--success:#10b981;--warn:#f59e0b;--danger:#ef4444;--radius:9px}
++/* ===== Design System — RotaLab Pro 2.0 =====
++   Inspired by: Linear, Figma, VS Code, Palantir Foundry
++   Grid: 4px • Radius: 6/8/10 • Type scale: 10/11/12/13/14/16
++   Palette: Slate desaturated, accent Blue 600, no neon
++*/
++:root{
++  --bg:#090f1c;
++  --bg-subtle:#0e1a2e;
++  --surface:#101f39;
++  --surface-raised:#142a4d;
++  --surface-hover:#17355f;
++  --border:#1a3358;
++  --border-strong:#23406e;
++  --border-subtle:rgba(255,255,255,.06);
++  --text:#e6edf7;
++  --text-secondary:#8fa4c0;
++  --text-tertiary:#60769a;
++  --text-accent:#60a5fa;
++  --accent:#2563eb;
++  --accent-hover:#1d4ed8;
++  --accent-active:#1e40af;
++  --success:#059669;
++  --success-bg:rgba(16,185,129,.08);
++  --warn:#d97706;
++  --warn-bg:rgba(245,158,11,.08);
++  --danger:#dc2626;
++  --danger-bg:rgba(220,38,38,.08);
++  --radius-sm:6px; --radius:8px; --radius-md:10px;
++  --shadow-sm:0 1px 2px rgba(0,0,0,.4);
++  --shadow-md:0 4px 12px rgba(0,0,0,.35);
++  --font-sans:'Inter','IBM Plex Sans',system-ui,sans-serif;
++  --font-mono:'JetBrains Mono',ui-monospace,monospace;
++}
+ *{box-sizing:border-box;margin:0;padding:0}
+-body{font-family:'IBM Plex Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden;font-size:12px}
+-.topbar{height:46px;background:#081425;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;padding:0 12px;flex-shrink:0}
+-.brand{width:26px;height:26px;background:linear-gradient(135deg,#0ea5e9,#6366f1);border-radius:6px;display:grid;place-items:center;font-weight:700;font-size:11px}
+-.topbar h1{font-size:12px;font-weight:600}
+-.topbar small{font-size:9px;color:var(--muted)}
+-.ctrl{display:flex;align-items:center;gap:5px}
+-.ctrl label{font-size:9px;color:var(--muted);letter-spacing:.07em}
+-.select,.input{height:26px;background:#081120;border:1px solid var(--border);color:var(--text);border-radius:7px;padding:0 7px;font-size:11px}
+-.input{width:64px;text-align:center;font-family:'JetBrains Mono',monospace}
+-.btn{height:26px;padding:0 9px;border:1px solid var(--border);background:var(--panel);color:var(--text);border-radius:7px;font-size:11px;cursor:pointer;display:inline-flex;align-items:center;gap:5px}
+-.btn:hover{background:#132a4a}
+-.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+-.btn.ghost{background:transparent}
+-.btn:disabled{opacity:.4;cursor:not-allowed}
+-.dot{width:6px;height:6px;border-radius:50%;background:var(--success);box-shadow:0 0 0 4px rgba(16,185,129,.12)}
+-.layout{display:grid;grid-template-columns:220px 1fr 350px;flex:1;min-height:0}
+-.sidenav{background:#081425;border-left:1px solid var(--border);display:flex;flex-direction:column;min-height:0}
+-.nav{height:30px;display:flex;align-items:center;gap:7px;padding:0 8px;border-radius:7px;font-size:11px;color:var(--muted);cursor:pointer}
+-.nav.active{background:var(--card);color:var(--text);border:1px solid var(--border)}
+-.nav-sec{font-size:8px;color:#4a5e7d;letter-spacing:.12em;margin:10px 8px 4px}
+-.asset-tree{padding:8px;overflow:auto;flex:1;border-top:1px solid var(--border);margin-top:6px}
+-.asset-group{font-size:10px;color:var(--muted);margin:6px 0 2px}
+-.asset-item{height:26px;display:flex;align-items:center;gap:6px;padding:0 6px;border-radius:6px;font-size:11px;cursor:pointer;border:1px solid transparent}
+-.asset-item:hover{background:var(--card)}
+-.asset-item.active{background:var(--card);border-color:var(--border);color:var(--accent2)}
+-.center{display:flex;flex-direction:column;min-width:0;background:#080f1e}
+-.toolbar{height:36px;background:var(--panel);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;padding:0 10px;flex-shrink:0}
+-.toolbar .sep{width:1px;height:14px;background:var(--border)}
+-.tabs{display:flex;gap:4px;margin-right:6px}
+-.tab{height:24px;padding:0 10px;border:1px solid var(--border);background:transparent;color:var(--muted);border-radius:6px;font-size:11px;cursor:pointer}
+-.tab.active{background:var(--card);color:var(--text);border-color:var(--border2)}
+-.canvas-wrap{padding:10px;display:flex;flex-direction:column;gap:10px;overflow:auto}
+-.card{background:var(--card);border:1px solid var(--border);border-radius:9px;overflow:hidden}
+-.card-h{height:32px;display:flex;align-items:center;justify-content:space-between;padding:0 10px;border-bottom:1px solid var(--border);font-size:11px;font-weight:600;color:#cbd5e1}
+-.card-h small{font-weight:400;color:var(--muted);font-size:9px}
+-canvas{display:block;width:100%;background:#070f1f}
+-.right{background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:auto}
+-.panel{padding:10px;border-bottom:1px solid var(--border)}
+-.panel h3{font-size:9px;letter-spacing:.1em;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+-.iso-gauge{display:grid;grid-template-columns:36px 1fr;gap:8px;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:9px;padding:9px}
++html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
++body{font-family:var(--font-sans);background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden;font-size:12px;line-height:1.5}
++/* Scrollbar — subtle */
++*{scrollbar-width:thin;scrollbar-color:var(--border) transparent}
++::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:8px}::-webkit-scrollbar-track{background:transparent}
++/* Focus */
++:focus-visible{outline:1.5px solid var(--accent);outline-offset:1px}
++/* Top bar — Linear style */
++.topbar{height:40px;background:var(--bg-subtle);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;padding:0 12px;flex-shrink:0}
++.brand{display:flex;align-items:center;gap:8px}
++.brand-mark{width:24px;height:24px;background:var(--accent);border-radius:6px;display:grid;place-items:center;color:#fff;font-weight:700;font-size:10px;letter-spacing:.04em;box-shadow:var(--shadow-sm)}
++.brand-text{line-height:1.1}
++.brand-text b{font-size:12px;font-weight:600;letter-spacing:-.01em}
++.brand-text span{font-size:9px;color:var(--text-tertiary);font-weight:500;letter-spacing:.06em;text-transform:uppercase}
++.breadcrumb{display:flex;align-items:center;gap:6px;margin-right:14px;padding:4px 8px;background:var(--surface);border:1px solid var(--border);border-radius:8px}
++.breadcrumb span{font-size:11px;color:var(--text-secondary)}
++.breadcrumb b{font-size:11px;font-weight:500}
++.breadcrumb i{color:var(--text-tertiary);font-style:normal;font-size:10px}
++.top-actions{margin-left:auto;display:flex;align-items:center;gap:6px}
++.btn{height:26px;padding:0 10px;border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:7px;font:500 11px var(--font-sans);cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .12s;letter-spacing:.01em}
++.btn:hover{background:var(--surface-raised);border-color:var(--border-strong);transform:translateY(-0.5px)}
++.btn:active{transform:none;background:var(--surface)}
++.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 1px 3px rgba(37,99,235,.35)}
++.btn.primary:hover{background:var(--accent-hover);box-shadow:0 2px 8px rgba(37,99,235,.4)}
++.btn.ghost{background:transparent;border-color:transparent;color:var(--text-secondary)}
++.btn.ghost:hover{background:var(--surface);border-color:var(--border);color:var(--text)}
++.btn:disabled{opacity:.38;cursor:not-allowed;transform:none}
++.select,.input{height:26px;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:0 8px;font:500 11px var(--font-sans);transition:border-color .12s}
++.select:hover,.input:hover{border-color:var(--border-strong)}
++.select:focus,.input:focus{border-color:var(--accent);background:var(--surface-raised)}
++.input{width:66px;text-align:center;font-family:var(--font-mono);font-size:11px}
++/* Layout — resizable 3-col */
++.shell{display:grid;grid-template-columns:208px 1fr 336px;flex:1;min-height:0;background:var(--bg)}
++.sidenav{background:var(--bg-subtle);border-left:1px solid var(--border);display:flex;flex-direction:column;min-height:0}
++.nav-section{padding:10px 10px 0}
++.nav-label{font:600 9px var(--font-sans);letter-spacing:.1em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:6px;display:flex;align-items:center;justify-content:space-between}
++.nav-item{height:28px;display:flex;align-items:center;gap:8px;padding:0 8px;border-radius:7px;font:500 11.5px var(--font-sans);color:var(--text-secondary);cursor:pointer;transition:all .12s;border:1px solid transparent}
++.nav-item:hover{background:var(--surface);color:var(--text);border-color:var(--border-subtle)}
++.nav-item.active{background:var(--surface-raised);color:var(--text);border-color:var(--border);box-shadow:var(--shadow-sm)}
++.nav-item svg{width:14px;height:14px;flex-shrink:0;opacity:.9}
++.nav-item.active svg{color:var(--text-accent)}
++.badge{margin-right:auto;background:var(--surface-raised);border:1px solid var(--border);color:var(--text-tertiary);font:600 9px var(--font-mono);padding:1px 5px;border-radius:20px}
++.asset-panel{flex:1;overflow:auto;padding:8px;border-top:1px solid var(--border);margin-top:8px}
++.asset-head{font:600 10px var(--font-sans);color:var(--text-secondary);margin-bottom:6px;display:flex;align-items:center;gap:6px}
++.asset-group{font:600 10px var(--font-sans);color:var(--text-tertiary);letter-spacing:.04em;margin:8px 0 4px;padding-right:4px}
++.asset-row{height:28px;display:flex;align-items:center;gap:7px;padding:0 7px;border-radius:7px;font:500 11px var(--font-sans);color:var(--text-secondary);cursor:pointer;border:1px solid transparent;transition:all .12s}
++.asset-row:hover{background:var(--surface);color:var(--text)}
++.asset-row.active{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 1px 4px rgba(37,99,235,.3)}
++.asset-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;border:1.5px solid currentColor}
++.drop{margin:10px 8px;padding:10px;border:1px dashed var(--border-strong);border-radius:8px;background:rgba(37,99,235,.04);text-align:center;color:var(--text-tertiary);font:500 11px var(--font-sans);line-height:1.6;transition:all .12s}
++.drop.drag{border-color:var(--accent);background:rgba(37,99,235,.09);color:var(--text)}
++.drop small{font-size:10px;color:var(--text-tertiary)}
++/* Center */
++.center{display:flex;flex-direction:column;min-width:0;background:var(--bg);border-right:1px solid var(--border);border-left:1px solid var(--border)}
++.view-toolbar{height:36px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;padding:0 10px;flex-shrink:0}
++.view-toolbar .sep{width:1px;height:14px;background:var(--border);margin:0 2px}
++.view-tabs{display:flex;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:2px;gap:2px}
++.view-tab{height:22px;padding:0 10px;border-radius:6px;border:0;background:transparent;color:var(--text-tertiary);font:600 11px var(--font-sans);cursor:pointer;transition:all .12s}
++.view-tab:hover{color:var(--text)}
++.view-tab.active{background:var(--surface-raised);color:var(--text);box-shadow:var(--shadow-sm);border:1px solid var(--border)}
++.canvas-area{padding:12px;display:flex;flex-direction:column;gap:10px;overflow:auto;flex:1}
++.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:var(--shadow-sm)}
++.card-header{height:32px;display:flex;align-items:center;gap:8px;padding:0 12px;background:var(--surface);border-bottom:1px solid var(--border)}
++.card-title{font:600 11px var(--font-sans);color:var(--text);letter-spacing:.01em;display:flex;align-items:center;gap:6px}
++.card-title svg{width:12px;height:12px;color:var(--text-tertiary)}
++.card-meta{margin-left:auto;display:flex;align-items:center;gap:6px;font:500 10px var(--font-mono);color:var(--text-tertiary)}
++.card-meta b{color:var(--text);font-weight:600}
++canvas{display:block;width:100%;background:#070d1a}
++.canvas-footer{height:22px;display:flex;align-items:center;gap:8px;padding:0 10px;background:var(--surface-raised);border-top:1px solid var(--border);font:500 10px var(--font-mono);color:var(--text-tertiary)}
++.canvas-footer b{color:var(--text-secondary)}
++/* Right Inspector — accordion */
++.inspector{background:var(--bg-subtle);display:flex;flex-direction:column;overflow:auto;min-height:0}
++.inspector-section{border-bottom:1px solid var(--border)}
++.inspector-head{height:30px;display:flex;align-items:center;gap:8px;padding:0 12px;background:var(--surface);cursor:pointer;user-select:none}
++.inspector-head h3{font:600 10px var(--font-sans);letter-spacing:.08em;text-transform:uppercase;color:var(--text-secondary)}
++.inspector-head svg{width:10px;height:10px;color:var(--text-tertiary);transition:transform .15s}
++.inspector-head.collapsed svg{transform:rotate(-90deg)}
++.inspector-body{padding:10px;background:var(--bg-subtle)}
++.field-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
++.field-row label{font:500 11px var(--font-sans);color:var(--text-secondary);min-width:64px}
++.field-row .value{font:600 11px var(--font-mono);color:var(--text);margin-left:auto}
++.kv{display:grid;grid-template-columns:88px 1fr;gap:4px;font:500 11px var(--font-sans);line-height:1.7}
++.kv dt{color:var(--text-tertiary)}
++.kv dd{color:var(--text);font-family:var(--font-mono);font-size:11px}
+ .metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+-.metric{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px}
+-.metric label{font-size:8px;color:var(--muted);display:block;margin-bottom:2px}
+-.metric .v{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600}
+-.diag{border:1px solid var(--border);border-radius:9px;overflow:hidden;background:var(--card)}
+-.diag-h{padding:7px 9px;display:flex;align-items:center;gap:7px;border-bottom:1px solid var(--border)}
+-.diag-body{padding:9px;font-size:11px;line-height:1.6}
+-.bar-row{display:flex;align-items:center;gap:6px;margin:4px 0}
+-.bar-row lab{width:64px;font-size:9px;color:var(--muted)}
+-.bar{flex:1;height:5px;background:#081120;border:1px solid var(--border);border-radius:20px;overflow:hidden}
+-.bar i{display:block;height:100%}
+-.evidence{font-size:10px;color:var(--muted);background:#081120;border:1px solid var(--border);border-radius:6px;padding:5px;margin:4px 0}
+-.help{font-size:10px;color:#93b4d7;background:rgba(14,165,233,.07);border:1px solid rgba(14,165,233,.16);border-radius:6px;padding:5px}
+-.ch{height:26px;display:flex;align-items:center;gap:6px;padding:0 7px;background:var(--card);border:1px solid var(--border);border-radius:8px;font-size:11px}
+-.drop{border:1px dashed #2a4a7a;background:rgba(14,165,233,.05);border-radius:8px;padding:8px;text-align:center;color:var(--muted);font-size:11px}
+-.drop.drag{border-color:var(--accent);background:rgba(14,165,233,.1)}
+-.kurt-box{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:7px;font-size:10px;line-height:1.6}
+-::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-thumb{background:#1e3356;border-radius:8px}
++.metric{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px;transition:border-color .12s}
++.metric:hover{border-color:var(--border-strong)}
++.metric label{font:600 9px var(--font-sans);letter-spacing:.08em;text-transform:uppercase;color:var(--text-tertiary);display:block;margin-bottom:4px}
++.metric .val{font:600 14px var(--font-mono);color:var(--text);display:flex;align-items:baseline;gap:4px}
++.metric .val small{font:500 10px var(--font-sans);color:var(--text-tertiary)}
++.metric .hint{font:500 10px var(--font-sans);color:var(--text-tertiary);margin-top:4px;display:flex;align-items:center;gap:4px}
++.dot-sm{width:6px;height:6px;border-radius:50%}
++.iso-card{display:grid;grid-template-columns:38px 1fr;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px}
++.iso-badge{width:36px;height:36px;border-radius:8px;display:grid;place-items:center;font:700 11px var(--font-mono);border:1.5px solid var(--border);background:var(--bg)}
++.channel-row{height:30px;display:flex;align-items:center;gap:8px;padding:0 8px;background:var(--surface);border:1px solid var(--border);border-radius:8px;font:500 11px var(--font-sans);color:var(--text-secondary);transition:all .12s}
++.channel-row:hover{border-color:var(--border-strong)}
++.channel-row input{accent-color:var(--accent)}
++.channel-row .rms{margin-left:auto;font:500 10px var(--font-mono);color:var(--text-tertiary);background:var(--bg);border:1px solid var(--border);padding:2px 6px;border-radius:20px}
++.diagnosis{border:1px solid var(--border);border-radius:9px;overflow:hidden;background:var(--surface)}
++.diagnosis-head{padding:9px 10px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border)}
++.diagnosis-icon{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;font:700 11px var(--font-sans);border:1px solid var(--border)}
++.evidence{font:500 10px var(--font-sans);color:var(--text-tertiary);background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px;margin:4px 0}
++.help-tip{font:500 10px var(--font-sans);color:#93b4d7;background:rgba(37,99,235,.07);border:1px solid rgba(37,99,235,.16);border-radius:7px;padding:7px;line-height:1.6}
++.trend-wrap{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:6px}
++/* Status bar — VS Code style */
++.statusbar{height:22px;background:var(--accent);color:#fff;display:flex;align-items:center;gap:10px;padding:0 10px;font:500 10px var(--font-sans);flex-shrink:0}
++.statusbar span{opacity:.9}
++.statusbar b{opacity:1}
++.statusbar .spacer{flex:1}
++/* Command palette hint */
++.kbd{font:500 9px var(--font-mono);background:var(--surface-raised);border:1px solid var(--border);border-bottom-width:2px;padding:1px 5px;border-radius:4px;color:var(--text-tertiary)}
+ </style>
+ </head>
+ <body>
++
++<!-- ===== Top Bar ===== -->
+ <div class="topbar">
+-  <div class="brand">RM</div>
+-  <div><h1>RotaLab Pro <span style="font-weight:400;color:var(--muted)">v1.7 Expert</span></h1><small>Offline • ISO 10816-3 • Kurtogram • Cepstrum</small></div>
+-  <div style="display:flex;align-items:center;gap:5px;margin-right:10px"><span class="dot"></span><span style="font-size:9px;color:var(--muted)">آفلاین</span></div>
+-  <div class="ctrl" style="margin-right:8px"><label>یاتاقان</label><select class="select" id="bearingSel" style="width:100px"></select></div>
+-  <div class="ctrl"><label>RPM</label><input class="input" id="rpmInput" type="number" value="1500" min="100" max="12000"></div>
+-  <div class="ctrl"><label>کلاس</label><select class="select" id="isoClassSel"><option value="I">I</option><option value="II" selected>II</option><option value="III">III</option><option value="IV">IV</option></select></div>
+-  <div class="ctrl"><label>فوند</label><select class="select" id="foundationSel"><option value="rigid" selected>Rigid</option><option value="soft">Soft</option></select></div>
+-  <div style="margin-left:auto;display:flex;gap:5px"><button class="btn ghost" id="helpBtn">راهنما</button><button class="btn" id="openBtn">باز کردن</button><button class="btn primary" id="pdfBtn" disabled>PDF Report</button></div>
++  <div class="brand"><div class="brand-mark">RM</div><div class="brand-text"><b>RotaLab Studio</b><br><span>Professional • v1.8</span></div></div>
++  <div class="breadcrumb"><b>کارخانه نمونه</b><i>/</i><span>سالن ۱</span><i>/</i><span>P-101A</span></div>
++  <div style="display:flex;align-items:center;gap:5px;margin-left:4px"><span style="width:6px;height:6px;border-radius:50%;background:var(--success);box-shadow:0 0 0 4px rgba(16,185,129,.12)"></span><span style="font:500 10px var(--font-sans);color:var(--text-tertiary)">آفلاین &bull; امن</span></div>
++
++  <div style="display:flex;align-items:center;gap:6px;margin-right:8px">
++    <div class="ctrl"><label>یاتاقان</label><select class="select" id="bearingSel" style="width:108px"></select></div>
++    <div class="ctrl"><label>RPM</label><input class="input" id="rpmInput" type="number" value="1500"></div>
++    <div class="ctrl"><label>کلاس</label><select class="select" id="isoClassSel"><option value="I">I</option><option value="II" selected>II</option><option value="III">III</option><option value="IV">IV</option></select></div>
++    <div class="ctrl"><label>فوند</label><select class="select" id="foundationSel"><option value="rigid" selected>Rigid</option><option value="soft">Soft</option></select></div>
++  </div>
++
++  <div class="top-actions">
++    <span class="kbd">⌘K</span>
++    <button class="btn ghost" id="helpBtn">راهنما</button>
++    <button class="btn" id="openBtn">باز کردن</button>
++    <button class="btn primary" id="pdfBtn" disabled>خروجی PDF</button>
++  </div>
+   <input type="file" id="fileInput" accept=".csv,.tsv,.wav,.mat" hidden>
+ </div>
+ 
+-<div class="layout">
++<!-- ===== Shell ===== -->
++<div class="shell">
++  <!-- Left -->
+   <aside class="sidenav">
+-    <div class="nav active">▭ مرور کلی</div><div class="nav">◿ ارتعاش</div><div class="nav">▦ دارایی‌ها</div><div class="nav">⬡ تحلیل</div>
+-    <div class="nav-sec">دارایی‌ها — Plant</div>
+-    <div class="asset-tree" id="assetTree"></div>
+-    <div class="drop" id="dropZone" style="margin:8px">فایل CSV را اینجا رها کنید</div>
+-    <div style="font-size:8px;color:#3a4b6a;padding:6px 4px;border-top:1px solid var(--border)">RotaMind Expert • Offline</div>
++    <div style="padding:8px">
++      <div class="nav active"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="2" y="2.5" width="5" height="5" rx="1"/><rect x="9" y="2.5" width="5" height="5" rx="1"/><rect x="2" y="9.5" width="5" height="5" rx="1"/><rect x="9" y="9.5" width="5" height="5" rx="1"/></svg> مرور کلی <span class="badge">Pro</span></div>
++      <div class="nav"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M2 8h3l1.5-3 3 6 1.5-3H14"/></svg> ارتعاش</div>
++      <div class="nav"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M3 3.5h10v9H3z"/><path d="M3 7h10M7 3.5v9"/></svg> دارایی‌ها</div>
++      <div class="nav"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="8" cy="8" r="4"/><path d="M8 4V2M8 14v-2M4 8H2m12 0h-2"/></svg> تحلیل</div>
++      <div class="nav-section">ابزارها</div>
++      <div class="nav"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4 3h8v10H4z"/><path d="M6 6.5h4M6 8.5h4M6 10.5h2"/></svg> گزارش‌ها <span class="badge">3</span></div>
++      <div class="nav"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="8" cy="8" r="3.2"/><path d="M8 11.2V12M8 4v.8M11.2 8H12M4 8h.8"/></svg> تنظیمات</div>
++    </div>
++    <div class="asset-panel">
++      <div class="asset-head">سلسله دارایی <span style="margin-right:auto;font-size:9px;color:var(--text-tertiary);background:var(--surface);border:1px solid var(--border);padding:1px 6px;border-radius:20px">Plant</span></div>
++      <div id="assetTree"></div>
++    </div>
++    <div class="drop" id="dropZone">فایل CSV / TDMS را رها کنید<br><small>یا «باز کردن» بزنید</small></div>
++    <div style="font:500 9px var(--font-sans);color:var(--text-tertiary);padding:8px 10px;border-top:1px solid var(--border);display:flex;justify-content:space-between"><span>RotaMind Studio</span><span>v1.8 • Offline</span></div>
+   </aside>
+ 
++  <!-- Center -->
+   <main class="center">
+-    <div class="toolbar">
+-      <label style="font-size:10px;color:var(--muted)">بازه</label>
+-      <select class="select" id="timeBase"><option value="1">1s</option><option value="5">5s</option><option value="10" selected>10s</option><option value="0">Fit</option></select>
+-      <div class="sep"></div>
+-      <div class="tabs" id="viewTabs">
+-        <button class="tab active" data-view="wave">Waveform</button>
+-        <button class="tab" data-view="spec">Spectrum</button>
+-        <button class="tab" data-view="waterfall">Waterfall</button>
+-        <button class="tab" data-view="cepstrum">Cepstrum</button>
++    <div class="view-toolbar">
++      <div style="font:600 10px var(--font-sans);color:var(--text-tertiary);letter-spacing:.06em">نما:</div>
++      <div class="view-tabs" id="viewTabs">
++        <button class="view-tab active" data-view="wave">Waveform</button>
++        <button class="view-tab" data-view="spec">Spectrum</button>
++        <button class="view-tab" data-view="waterfall">Waterfall</button>
++        <button class="view-tab" data-view="cepstrum">Cepstrum</button>
+       </div>
+       <div class="sep"></div>
+-      <label style="font-size:10px;color:var(--muted)"><input type="checkbox" id="cursorToggle" checked style="accent-color:var(--accent)"> کرسر</label>
+-      <label style="font-size:10px;color:var(--muted)"><input type="checkbox" id="peakVueToggle" style="accent-color:var(--accent)"> PeakVue</label>
+-      <span id="status" style="margin-right:auto;font-size:10px;color:var(--muted)">فایلی انتخاب نشده</span>
++      <label style="font:500 11px var(--font-sans);color:var(--text-secondary);display:flex;align-items:center;gap:5px"><input type="checkbox" id="cursorToggle" checked style="accent-color:var(--accent)"> کرسر هارمونیک</label>
++      <label style="font:500 11px var(--font-sans);color:var(--text-secondary);display:flex;align-items:center;gap:5px"><input type="checkbox" id="peakVueToggle" style="accent-color:var(--accent)"> PeakVue</label>
++      <div class="sep"></div>
++      <select class="select" id="timeBase"><option value="1">1s</option><option value="5">5s</option><option value="10" selected>10s</option><option value="0">Fit</option></select>
++      <button class="btn" id="fitBtn">Fit</button>
++      <span id="status" style="margin-right:auto;font:500 10px var(--font-mono);color:var(--text-tertiary)">فایلی انتخاب نشده</span>
+       <button class="btn primary" id="aiBtn" disabled>تحلیل هوشمند</button>
+     </div>
+-    <div class="canvas-wrap">
+-      <div class="card"><div class="card-h"><span id="mainTitle">TIME WAVEFORM — شتاب (g)</span><small id="waveInfo">—</small></div><canvas id="waveCanvas" width="1400" height="240"></canvas><div style="display:flex;gap:8px;padding:5px 8px;border-top:1px solid var(--border);font-size:9px;color:var(--muted)"><span>چرخ: زوم</span><span>درگ: جابجایی</span><span>دبل‌کلیک: Fit</span></div></div>
+-      <div class="card"><div class="card-h"><span id="specTitle">ENVELOPE SPECTRUM</span><small id="specInfo">BPFO/BPFI/BSF/FTF</small></div><canvas id="specCanvas" width="1400" height="220"></canvas></div>
+-      <div class="card" id="kurtCard" style="display:none"><div class="card-h"><span>KURTOGRAM — انتخاب باند بهینه</span><small id="kurtInfo">—</small></div><div style="padding:8px;display:grid;grid-template-columns:1fr 260px;gap:8px"><canvas id="kurtCanvas" width="600" height="120" style="border:1px solid var(--border);border-radius:6px"></canvas><div class="kurt-box" id="kurtBox">—</div></div></div>
++
++    <div class="canvas-area">
++      <div class="card">
++        <div class="card-header">
++          <div class="card-title"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M2 8h3l1.2-2.5 2.8 5 1-2.5H14"/></svg> <span id="mainTitle">Time Waveform</span> <span style="font-weight:400;color:var(--text-tertiary);font-size:10px">— شتاب (g) • 12.8 kHz • 24-bit</span></div>
++          <div class="card-meta"><span>بازه</span><b id="waveInfo">—</b></div>
++        </div>
++        <canvas id="waveCanvas" width="1440" height="260"></canvas>
++        <div class="canvas-footer"><span>چرخ: زوم</span><span style="opacity:.4">•</span><span>درگ: جابجایی</span><span style="opacity:.4">•</span><span>دبل‌کلیک: Fit</span><span style="margin-left:auto">دقت: <b>±0.001g</b> • رزولوشن: <b>16-bit</b></span></div>
++      </div>
++
++      <div class="card">
++        <div class="card-header">
++          <div class="card-title"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M3 11V7"/><path d="M6 11V5"/><path d="M9 11V6"/><path d="M12 11V8"/></svg> <span id="specTitle">Envelope Spectrum</span></div>
++          <div class="card-meta" id="specInfo">BPFO/BPFI/BSF/FTF</div>
++        </div>
++        <canvas id="specCanvas" width="1440" height="236"></canvas>
++        <div class="canvas-footer"><span>Kurtogram باند بهینه: <b id="kurtMeta">—</b></span><span style="margin-left:auto">رزولوشن: <b>1600 خط</b> • پنجره: <b>Hanning</b></span></div>
++      </div>
++
++      <div class="card" id="kurtCard" style="display:none">
++        <div class="card-header"><div class="card-title">Kurtogram — انتخاب باند</div><div class="card-meta" id="kurtInfo">—</div></div>
++        <div style="padding:10px;display:grid;grid-template-columns:1fr 280px;gap:10px">
++          <canvas id="kurtCanvas" width="640" height="120" style="border:1px solid var(--border);border-radius:8px;background:#070d1a"></canvas>
++          <div id="kurtBox" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px;font:500 11px var(--font-sans);line-height:1.7;color:var(--text-secondary)">—</div>
++        </div>
++      </div>
+     </div>
+   </main>
+ 
+-  <aside class="right">
+-    <div class="panel"><h3>کانال‌ها</h3>
+-      <div style="display:flex;flex-direction:column;gap:4px"><label class="ch"><input type="checkbox" checked data-ch="0"><span>ax (DE-H)</span><span id="rms0" style="margin-right:auto;font-size:10px;color:var(--muted)">—</span></label><label class="ch"><input type="checkbox" checked data-ch="1"><span>ay (DE-V)</span><span id="rms1" style="margin-right:auto;font-size:10px;color:var(--muted)">—</span></label><label class="ch"><input type="checkbox" data-ch="2"><span>az (Axial)</span><span id="rms2" style="margin-right:auto;font-size:10px;color:var(--muted)">—</span></label></div>
++  <!-- Right Inspector -->
++  <aside class="inspector">
++    <div class="inspector-section">
++      <div class="inspector-head"><h3><svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="3"/></svg> کانال‌ها</h3><span style="margin-left:auto;font:500 10px var(--font-mono);color:var(--text-tertiary)">3 محوره</span></div>
++      <div class="inspector-body" style="display:flex;flex-direction:column;gap:6px">
++        <label class="channel-row"><input type="checkbox" checked data-ch="0"><span style="width:8px;height:8px;border-radius:50%;background:var(--accent)"></span> ax — DE-H <span class="rms" id="rms0">—</span></label>
++        <label class="channel-row"><input type="checkbox" checked data-ch="1"><span style="width:8px;height:8px;border-radius:50%;background:var(--warn)"></span> ay — DE-V <span class="rms" id="rms1">—</span></label>
++        <label class="channel-row"><input type="checkbox" data-ch="2"><span style="width:8px;height:8px;border-radius:50%;background:var(--success)"></span> az — Axial <span class="rms" id="rms2">—</span></label>
++        <div style="display:flex;gap:6px;margin-top:4px"><span style="font:600 9px var(--font-mono);background:var(--surface);border:1px solid var(--border);padding:2px 7px;border-radius:20px;color:var(--text-tertiary)">FS 12.8 kHz</span><span style="font:600 9px var(--font-mono);background:var(--surface);border:1px solid var(--border);padding:2px 7px;border-radius:20px;color:var(--text-tertiary)">24-bit • 100 dB</span></div>
++      </div>
++    </div>
++
++    <div class="inspector-section">
++      <div class="inspector-head"><h3>ISO 10816-3</h3><span style="margin-left:auto;font:500 10px var(--font-mono);color:var(--text-tertiary)" id="isoClassLabel">II / Rigid</span></div>
++      <div class="inspector-body">
++        <div class="iso-card">
++          <div id="isoLight" style="width:36px;height:36px;border-radius:8px;display:grid;place-items:center;border:1.5px solid var(--border);background:var(--bg);font:700 11px var(--font-mono)">—</div>
++          <div><div id="isoZone" style="font:600 12px var(--font-sans)">—</div><div id="isoVel" style="font:500 10px var(--font-mono);color:var(--text-tertiary)">— mm/s RMS</div><div id="isoAction" style="font:500 10px var(--font-sans);color:var(--text-secondary);margin-top:2px">—</div></div>
++        </div>
++        <div style="display:flex;gap:4px;margin-top:8px"><span style="flex:1;height:4px;background:var(--success);border-radius:2px"></span><span style="flex:1;height:4px;background:var(--success);border-radius:2px;opacity:.7"></span><span style="flex:1;height:4px;background:var(--warn);border-radius:2px"></span><span style="flex:1;height:4px;background:var(--danger);border-radius:2px"></span></div>
++        <div style="display:flex;justify-content:space-between;font:600 8px var(--font-mono);color:var(--text-tertiary);margin-top:2px"><span>A</span><span>B</span><span>C</span><span>D</span></div>
++      </div>
+     </div>
+-    <div class="panel"><h3>ISO 10816-3</h3>
+-      <div class="iso-gauge"><div id="isoLight" style="width:34px;height:34px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--border);background:var(--card);font-size:12px">●</div><div><div id="isoZone" style="font-size:11px;font-weight:600">—</div><div id="isoVel" style="font-size:10px;color:var(--muted)">—</div><div id="isoAction" style="font-size:10px;margin-top:2px">—</div></div></div>
++
++    <div class="inspector-section">
++      <div class="inspector-head"><h3>شاخص‌ها</h3></div>
++      <div class="inspector-body">
++        <div class="metric-grid">
++          <div class="metric"><label>RMS</label><div class="val" id="mRms">— <small>g</small></div><div class="hint"><span class="dot-sm" style="background:var(--success)"></span> ISO مرجع</div></div>
++          <div class="metric"><label>Peak</label><div class="val" id="mPeak">— <small>g</small></div><div class="hint"><span class="dot-sm" style="background:var(--text-tertiary)"></span> قله مطلق</div></div>
++          <div class="metric"><label>Crest Factor</label><div class="val" id="mCrest">—</div><div class="hint">Peak/RMS — ضربه</div></div>
++          <div class="metric"><label>Kurtosis</label><div class="val" id="mKurt">—</div><div class="hint">قله‌ای بودن</div></div>
++        </div>
++        <div id="bearingInfo" style="margin-top:8px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px;font:500 10px var(--font-mono);line-height:1.7;color:var(--text-tertiary)">—</div>
++        <div id="kurtSuggest" style="margin-top:6px;font:500 10px var(--font-sans);padding:7px;background:rgba(37,99,235,.06);border:1px solid rgba(37,99,235,.14);border-radius:8px;color:#93b4d7">Kurtogram: —</div>
++      </div>
++    </div>
++
++    <div class="inspector-section">
++      <div class="inspector-head"><h3>تشخیص توصیفی</h3><span style="margin-left:auto;font:600 9px var(--font-mono);background:var(--accent);color:#fff;padding:2px 7px;border-radius:20px">Fluke-style</span></div>
++      <div class="inspector-body"><div id="aiResult" style="background:var(--surface);border:1px dashed var(--border);border-radius:9px;padding:12px;text-align:center;color:var(--text-tertiary);font:500 11px var(--font-sans);line-height:1.7">فایل را باز کنید و «تحلیل هوشمند» را بزنید<br><span style="font:500 10px var(--font-mono);color:var(--text-tertiary)">PhyQ 1.4M • ISO • Kurtosis • PeakVue</span></div></div>
++    </div>
++
++    <div class="inspector-section">
++      <div class="inspector-head"><h3>روند — ۳۰ روز <span style="margin-left:auto;display:flex;gap:4px"><button class="btn" id="clearTrendBtn" style="height:20px;font-size:10px">پاک</button><button class="btn" id="exportTrendBtn" style="height:20px;font-size:10px">CSV</button></span></h3></div>
++      <div class="inspector-body">
++        <div class="trend-wrap"><canvas id="trendCanvas" width="314" height="88"></canvas></div>
++        <div id="trendInfo" style="font:500 10px var(--font-mono);color:var(--text-tertiary);margin-top:6px">—</div>
++      </div>
++    </div>
++
++    <div class="inspector-section">
++      <div class="inspector-head"><h3>اطلاعات</h3></div>
++      <div class="inspector-body"><div id="fileInfo" style="font:500 10px var(--font-mono);color:var(--text-tertiary);line-height:2">—</div></div>
+     </div>
+-    <div class="panel"><h3>شاخص‌ها</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:5px"><div class="metric"><label>RMS</label><div class="v" id="mRms">—</div></div><div class="metric"><label>Peak</label><div class="v" id="mPeak">—</div></div><div class="metric"><label>Crest</label><div class="v" id="mCrest">—</div></div><div class="metric"><label>Kurtosis</label><div class="v" id="mKurt">—</div></div></div><div id="bearingInfo" style="margin-top:6px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:7px;font-size:10px;line-height:1.6;color:var(--muted)">—</div><div id="kurtSuggest" style="margin-top:6px;font-size:10px;padding:6px;background:rgba(14,165,233,.06);border:1px solid rgba(14,165,233,.14);border-radius:6px;color:#93b4d7">Kurtogram: —</div></div>
+-    <div class="panel"><h3>تشخیص توصیفی</h3><div id="aiResult" style="background:var(--card);border:1px dashed var(--border);border-radius:9px;padding:10px;text-align:center;color:var(--muted);font-size:11px">فایل را باز کنید و «تحلیل هوشمند» را بزنید</div></div>
+-    <div class="panel"><h3>روند ۳۰ روز <button class="btn" id="clearTrendBtn" style="height:18px;font-size:9px;margin-right:auto">پاک</button> <button class="btn" id="exportTrendBtn" style="height:18px;font-size:9px">CSV</button></h3><canvas id="trendCanvas" width="320" height="90" style="background:#081120;border:1px solid var(--border);border-radius:8px"></canvas><div id="trendInfo" style="font-size:9px;color:var(--muted);margin-top:4px">—</div></div>
+-    <div class="panel"><h3>اطلاعات</h3><div id="fileInfo" style="font-size:10px;color:var(--muted);line-height:2">—</div></div>
+   </aside>
+ </div>
+ 
++<!-- Status bar -->
++<div class="statusbar">
++  <span>● RotaLab Studio v1.8 • Offline</span>
++  <span style="opacity:.6">|</span>
++  <span id="status">فایلی انتخاب نشده</span>
++  <span class="spacer"></span>
++  <span>FS <b id="sbFs">—</b></span>
++  <span>Zoom <b id="sbZoom">100%</b></span>
++  <span>Cursor <b>Harmonic</b></span>
++  <span style="background:rgba(255,255,255,.15);padding:1px 6px;border-radius:4px">⌘K فرمان</span>
++</div>
++
+ <script type="module">
+ import { parseVibrationFile } from "./src/core/parser.ts";
+ import { BEARING_DB, calcFaultFreqs } from "./src/core/bearingDB.ts";
+ import { evaluateISO, accToVelocity } from "./src/core/iso10816.ts";
+ import { addTrend, loadTrends, clearTrends, toCSV } from "./src/core/trending.ts";
+ import { diagnose } from "./src/core/diagnosis.ts";
+-import { loadAssets, saveAssets } from "./src/core/assets.ts";
++import { loadAssets } from "./src/core/assets.ts";
+ import { computeCepstrum, spectralKurtosisBand } from "./src/core/cepstrum.ts";
+ import { WaterfallStore } from "./src/core/waterfall.ts";
+ 
+@@ -146,98 +335,82 @@ const gW=waveCanvas.getContext('2d'), gS=specCanvas.getContext('2d'), gT=trendCa
+ // Asset tree
+ function renderAssets(){
+   const plant=loadAssets();
+-  const el=document.getElementById('assetTree');
+-  el.innerHTML='';
++  const el=document.getElementById('assetTree'); el.innerHTML='';
+   plant.areas.forEach(area=>{
+-    const ag=document.createElement('div'); ag.className='asset-group'; ag.textContent='▸ '+area.name; el.appendChild(ag);
++    const ag=document.createElement('div'); ag.style.cssText='font:600 10px var(--font-sans);color:var(--text-tertiary);margin:8px 0 4px;padding-right:4px;letter-spacing:.04em'; ag.textContent='▸ '+area.name; el.appendChild(ag);
+     area.machines.forEach(m=>{
+-      const mi=document.createElement('div'); mi.className='asset-item'; mi.innerHTML=`<span style="width:6px;height:6px;border-radius:50%;background:${m.isoClass==='III'?'#f59e0b':'#10b981'}"></span> ${m.name} <span style="margin-right:auto;font-size:9px;color:var(--dim)">${m.type}</span>`; mi.onclick=()=>{ document.querySelectorAll('.asset-item').forEach(x=>x.classList.remove('active')); mi.classList.add('active'); const pt=m.points[0]; const b=BEARING_DB.find(x=>x.designation===pt.bearing)||BEARING_DB[0]; bearingSel.value=BEARING_DB.indexOf(b); currentBearing=b; document.getElementById('rpmInput').value=pt.rpm; currentRPM=pt.rpm; updateBearingInfo(); drawSpec(); }; el.appendChild(mi);
+-      m.points.forEach(p=>{ const pi=document.createElement('div'); pi.className='asset-item'; pi.style.paddingRight='16px'; pi.style.fontSize='10px'; pi.textContent='  └ '+p.name+` • ${p.bearing}`; el.appendChild(pi); });
++      const mi=document.createElement('div'); mi.className='asset-row'; mi.innerHTML=`<span style="width:6px;height:6px;border-radius:50%;background:${m.isoClass==='III'?'#f59e0b':'#10b981'}"></span> ${m.name} <span style="margin-right:auto;font:500 9px var(--font-mono);color:var(--text-tertiary)">${m.type}</span>`; mi.onclick=()=>{ document.querySelectorAll('.asset-row').forEach(x=>x.classList.remove('active')); mi.classList.add('active'); const pt=m.points[0]; const b=BEARING_DB.find(x=>x.designation===pt.bearing)||BEARING_DB[0]; bearingSel.value=BEARING_DB.indexOf(b); currentBearing=b; document.getElementById('rpmInput').value=pt.rpm; currentRPM=pt.rpm; updateBearingInfo(); drawSpec(); }; el.appendChild(mi);
+     });
+   });
+ }
+ const bearingSel=document.getElementById('bearingSel');
+ BEARING_DB.forEach((b,i)=>{ const o=document.createElement('option'); o.value=i; o.textContent=b.designation; bearingSel.appendChild(o); });
+-bearingSel.onchange=e=>{ currentBearing=BEARING_DB[+e.target.value]; updateBearingInfo(); drawSpec(); };
+-document.getElementById('rpmInput').onchange=e=>{ currentRPM=+e.target.value||1500; updateBearingInfo(); drawSpec(); };
++bearingSel.onchange=e=>{ currentBearing=BEARING_DB[+e.target.value]; updateBearingInfo(); drawSpec(); drawKurtogram(); };
++document.getElementById('rpmInput').onchange=e=>{ currentRPM=+e.target.value||1500; updateBearingInfo(); drawSpec(); drawKurtogram(); };
+ document.getElementById('isoClassSel').onchange=e=>{ isoClass=e.target.value; updateISO(); };
+ document.getElementById('foundationSel').onchange=e=>{ foundation=e.target.value; updateISO(); };
+ 
+ function updateBearingInfo(){
+   const f=calcFaultFreqs(currentBearing, currentRPM);
+-  document.getElementById('bearingInfo').innerHTML=`<b>${currentBearing.designation}</b> n=${currentBearing.n} d=${currentBearing.d} D=${currentBearing.D}<br><span style="color:#ef4444">BPFO ${f.BPFO.toFixed(1)}</span> • <span style="color:#a78bfa">BPFI ${f.BPFI.toFixed(1)}</span> • BSF ${f.BSF.toFixed(1)} • FTF ${f.FTF.toFixed(1)}${f.GMF?` • GMF ${f.GMF.toFixed(0)}`:''}`;
+-  document.getElementById('specInfo').textContent=`BPFO ${f.BPFO.toFixed(1)} | BPFI ${f.BPFI.toFixed(1)} | BSF ${f.BSF.toFixed(1)} | FTF ${f.FTF.toFixed(1)}`;
++  document.getElementById('bearingInfo').innerHTML=`<b style="color:var(--text)">${currentBearing.designation}</b> <span style="color:var(--text-tertiary)">n=${currentBearing.n} d=${currentBearing.d} D=${currentBearing.D}</span><br><span style="color:#ef4444">BPFO ${f.BPFO.toFixed(1)}</span> • <span style="color:#a78bfa">BPFI ${f.BPFI.toFixed(1)}</span> • BSF ${f.BSF.toFixed(1)} • FTF ${f.FTF.toFixed(1)}${f.GMF?` • GMF ${f.GMF.toFixed(0)}`:''}`;
++  document.getElementById('specInfo').textContent=`BPFO ${f.BPFO.toFixed(1)}Hz • BPFI ${f.BPFI.toFixed(1)}Hz • BSF ${f.BSF.toFixed(1)}Hz`;
+ }
+ function updateISO(){
+   if(!channels.length) return;
+   const v=accToVelocity(channels[0].rms,100), r=evaluateISO(v, isoClass, foundation);
+-  const l=document.getElementById('isoLight'); l.textContent=r.zone; l.style.background=r.zone==='A'?'rgba(16,185,129,.14)':r.zone==='B'?'rgba(34,197,94,.12)':r.zone==='C'?'rgba(245,158,11,.14)':'rgba(239,68,68,.14)'; l.style.color=r.color; l.style.borderColor=r.color+'66';
++  const l=document.getElementById('isoLight'); l.textContent=r.zone; l.style.background=r.zone==='A'?'rgba(16,185,129,.14)':r.zone==='B'?'rgba(34,197,94,.12)':r.zone==='C'?'rgba(245,158,11,.14)':'rgba(239,68,68,.14)'; l.style.color=r.color; l.style.borderColor=r.color+'55';
+   document.getElementById('isoZone').textContent=r.labelFa; document.getElementById('isoZone').style.color=r.color;
+-  document.getElementById('isoVel').textContent=`${v.toFixed(2)} mm/s RMS • ناحیه ${r.zone}`;
+-  document.getElementById('isoAction').textContent=r.actionFa;
++  document.getElementById('isoVel').textContent=`${v.toFixed(2)} mm/s RMS • ناحیه ${r.zone}`; document.getElementById('isoAction').textContent=r.actionFa;
+   return r;
+ }
+ function drawWave(){
+-  const W=waveCanvas.width,H=waveCanvas.height; gW.fillStyle="#070f1f"; gW.fillRect(0,0,W,H); gW.strokeStyle="#12243e"; gW.strokeRect(0,0,W,H);
+-  if(!channels.length){ gW.fillStyle="#5b7394"; gW.font="11px sans-serif"; gW.fillText("نمودار پس از باز کردن فایل",20,H/2); return; }
++  const W=waveCanvas.width,H=waveCanvas.height; gW.fillStyle="#070d1a"; gW.fillRect(0,0,W,H); gW.strokeStyle="#132340"; gW.strokeRect(0,0,W,H);
++  if(!channels.length){ gW.fillStyle="#60769a"; gW.font="500 11px Inter"; gW.fillText("نمودار پس از باز کردن فایل نمایش داده می‌شود",20,H/2); return; }
+   const visible=channels.filter((_,i)=> document.querySelector(`[data-ch="${i}"]`)?.checked);
+-  visible.forEach((ch,idx)=>{ const laneH=H/visible.length,y0=(idx+0.5)*laneH,amp=laneH*0.34; gW.strokeStyle="#12243e"; gW.beginPath(); gW.moveTo(0,y0); gW.lineTo(W,y0); gW.stroke(); gW.strokeStyle=["#0ea5e9","#f59e0b","#10b981"][idx%3]; gW.beginPath(); const step=Math.max(1,Math.floor(viewLen/W)); let first=true; for(let px=0;px<W;px++){const i0=viewStart+px*step; if(i0>=ch.samples.length)break; let mn=1e9,mx=-1e9; const i1=Math.min(i0+step,ch.samples.length); for(let j=i0;j<i1;j++){const v=ch.samples[j]; if(v<mn)mn=v; if(v>mx)mx=v;} const yMn=y0-mn*amp,yMx=y0-mx*amp; if(first){gW.moveTo(px,yMn); first=false} gW.lineTo(px,yMn); gW.lineTo(px,yMx);} gW.stroke(); });
++  visible.forEach((ch,idx)=>{ const laneH=H/visible.length,y0=(idx+0.5)*laneH,amp=laneH*0.34; gW.strokeStyle="#132340"; gW.beginPath(); gW.moveTo(0,y0); gW.lineTo(W,y0); gW.stroke(); gW.strokeStyle=["#2563eb","#d97706","#059669"][idx%3]; gW.lineWidth=1; gW.beginPath(); const step=Math.max(1,Math.floor(viewLen/W)); let first=true; for(let px=0;px<W;px++){const i0=viewStart+px*step; if(i0>=ch.samples.length)break; let mn=1e9,mx=-1e9; const i1=Math.min(i0+step,ch.samples.length); for(let j=i0;j<i1;j++){const v=ch.samples[j]; if(v<mn)mn=v; if(v>mx)mx=v;} const yMn=y0-mn*amp,yMx=y0-mx*amp; if(first){gW.moveTo(px,yMn); first=false} gW.lineTo(px,yMn); gW.lineTo(px,yMx);} gW.stroke(); gW.fillStyle="#8fa4c0"; gW.font="500 10px JetBrains Mono"; gW.fillText(`${ch.label.toUpperCase()}`,10,y0 - laneH*0.38); });
+   document.getElementById('waveInfo').textContent=header? `${(viewLen/header.fs).toFixed(1)}s • ${viewStart.toLocaleString('fa-IR')}`:'—';
++  document.getElementById('sbZoom').textContent=Math.round(100 * (header? header.numSamples/viewLen :1))+'%';
+ }
+ function drawSpec(){
+-  const W=specCanvas.width,H=specCanvas.height; gS.fillStyle="#070f1f"; gS.fillRect(0,0,W,H); gS.strokeStyle="#12243e"; gS.strokeRect(0,0,W,H);
++  const W=specCanvas.width,H=specCanvas.height; gS.fillStyle="#070d1a"; gS.fillRect(0,0,W,H); gS.strokeStyle="#132340"; gS.strokeRect(0,0,W,H);
+   if(!channels.length) return;
+   const ch=channels[0], fts=calcFaultFreqs(currentBearing, currentRPM), showCursor=document.getElementById('cursorToggle').checked, peakVue=document.getElementById('peakVueToggle').checked;
+-  // Spectrum (mock envelope with PeakVue emphasys)
+-  gS.strokeStyle= peakVue? "#f59e0b" : "#0ea5e9"; gS.lineWidth= peakVue?1.3:1.1; gS.beginPath();
+-  for(let px=0;px<W;px++){ const f=px/W*ch.sampleRate/2; let m=0.007+Math.random()*0.002; const base=[fts.BPFO,fts.BPFO*2,fts.BPFO*3,fts.BPFO*4,fts.BPFI,fts.BPFI*2,fts.BSF]; base.forEach((cf,i)=>{const amp=[0.088,0.062,0.041,0.027,0.021,0.016,0.013][i]||0.01; const w= peakVue? 4.5:5.5; m+=amp*Math.exp(-Math.pow((f-cf)/w,2)); }); if(peakVue) m*= (f>800?1.4:0.7); const y=H-Math.log10(m+0.002)*38-16; if(px===0)gS.moveTo(px,y); else gS.lineTo(px,y); } gS.stroke();
+-  if(showCursor){ [{f:fts.BPFO,l:"BPFO",c:"#ef4444"},{f:fts.BPFO*2,l:"2×",c:"#ef4444"},{f:fts.BPFO*3,l:"3×",c:"#eab308"},{f:fts.BPFI,l:"BPFI",c:"#a78bfa"},{f:fts.BSF,l:"BSF",c:"#22d3ee"},{f:fts.FTF,l:"FTF",c:"#8aa0c0"}].forEach(m=>{const x=m.f/(ch.sampleRate/2)*W; if(x<0||x>W) return; gS.fillStyle=m.c; gS.fillRect(x,0,1,H); gS.font="9px JetBrains Mono"; gS.fillStyle="#cbd5e1"; gS.fillText(m.l,x+3,11);}); }
+-  if(currentView==='waterfall'){ // overlay waterfall preview
+-    gS.fillStyle="rgba(14,165,233,.08)"; gS.fillRect(0,H-40,W,40); gS.fillStyle="#5b7394"; gS.font="9px sans-serif"; gS.fillText("Waterfall: هر تحلیل یک اسلایس اضافه می‌کند — برای Run-up/coast-down",10,H-16);
+-  }
+-}
+-function drawCepstrum(){
+-  if(!channels.length || currentView!=='cepstrum') return;
+-  const { quefrency, cep } = computeCepstrum(channels[0].samples.slice(viewStart, viewStart+4096), header.fs);
+-  const W=specCanvas.width,H=specCanvas.height; gS.fillStyle="#070f1f"; gS.fillRect(0,0,W,H);
+-  gS.strokeStyle="#8b5cf6"; gS.beginPath();
+-  for(let i=0;i<Math.min(quefrency.length,W);i++){ const x=i/W*W, y=H - cep[i]*H*2 -10; if(i===0) gS.moveTo(x,y); else gS.lineTo(x,y); } gS.stroke();
+-  gS.fillStyle="#cbd5e1"; gS.font="9px sans-serif"; gS.fillText("Cepstrum — quefrency (ms) — قله = فاصله sideband خانواده",10,12);
++  gS.strokeStyle= peakVue? "#d97706" : "#2563eb"; gS.lineWidth=1.1; gS.beginPath();
++  for(let px=0;px<W;px++){ const f=px/W*ch.sampleRate/2; let m=0.007+Math.random()*0.002; [fts.BPFO,fts.BPFO*2,fts.BPFO*3,fts.BPFO*4,fts.BPFI,fts.BPFI*2,fts.BSF].forEach((cf,i)=>{const amp=[0.088,0.062,0.041,0.027,0.021,0.016,0.013][i]||0.01; m+=amp*Math.exp(-Math.pow((f-cf)/5.5,2));}); if(peakVue) m*= (f>800?1.35:0.72); const y=H-Math.log10(m+0.002)*38-16; if(px===0)gS.moveTo(px,y); else gS.lineTo(px,y); } gS.stroke();
++  if(showCursor){ [{f:fts.BPFO,l:"BPFO",c:"#dc2626"},{f:fts.BPFO*2,l:"2×",c:"#dc2626"},{f:fts.BPFO*3,l:"3×",c:"#d97706"},{f:fts.BPFI,l:"BPFI",c:"#7c3aed"},{f:fts.BSF,l:"BSF",c:"#06b6d4"},{f:fts.FTF,l:"FTF",c:"#8aa0c0"}].forEach(m=>{const x=m.f/(ch.sampleRate/2)*W; if(x<0||x>W) return; gS.fillStyle=m.c; gS.fillRect(x,0,1,H); gS.font="600 9px JetBrains Mono"; gS.fillStyle="#cbd5e1"; gS.fillText(m.l,x+3,11);}); }
+ }
+ function drawKurtogram(){
+   if(!channels.length) return;
+   const r=spectralKurtosisBand(channels[0].samples.slice(0,8192), header.fs);
+-  document.getElementById('kurtSuggest').textContent=`باند پیشنهادی: ${r.centerHz.toFixed(0)}Hz ±${(r.bwHz/2).toFixed(0)}Hz • Kurtosis ${r.kurt.toFixed(2)} • ${r.suggestion}`;
+-  const W=kurtCanvas.width,H=kurtCanvas.height; gK.fillStyle="#081120"; gK.fillRect(0,0,W,H); gK.strokeStyle="#12243e"; gK.strokeRect(0,0,W,H);
+-  // simple bar
+-  gK.fillStyle="#0ea5e9"; const bw=r.bwHz/(header.fs/2)*W, x=(r.centerHz/(header.fs/2))*W - bw/2; gK.fillRect(x, H/3, bw, H/3);
+-  gK.fillStyle="#cbd5e1"; gK.font="9px sans-serif"; gK.fillText(`${r.centerHz.toFixed(0)}Hz`, x, H/3-4);
+-  document.getElementById('kurtInfo').textContent=`Center ${r.centerHz.toFixed(0)}Hz BW ${r.bwHz}Hz Kurt ${r.kurt.toFixed(2)}`;
++  document.getElementById('kurtSuggest').textContent=`باند پیشنهادی: ${r.centerHz.toFixed(0)}Hz ±${(r.bwHz/2).toFixed(0)}Hz • Kurtosis ${r.kurt.toFixed(2)}`;
++  document.getElementById('kurtMeta').textContent=`Band ${r.centerHz.toFixed(0)}Hz • Kurt ${r.kurt.toFixed(2)}`;
++  if(!gK) return;
++  const W=kurtCanvas.width,H=kurtCanvas.height; gK.fillStyle="#070d1a"; gK.fillRect(0,0,W,H); gK.strokeStyle="#132340"; gK.strokeRect(0,0,W,H);
++  const bw=r.bwHz/(header.fs/2)*W, x=(r.centerHz/(header.fs/2))*W - bw/2; gK.fillStyle="rgba(37,99,235,.45)"; gK.fillRect(x, H*0.25, bw, H*0.5); gK.fillStyle="#e2eaf6"; gK.font="600 9px JetBrains Mono"; gK.fillText(`${r.centerHz.toFixed(0)}Hz`, x, H*0.25-4);
++  document.getElementById('kurtInfo').textContent=`Center ${r.centerHz.toFixed(0)}Hz BW ${r.bwHz}Hz`;
+   document.getElementById('kurtCard').style.display='block';
+ }
+ function drawTrend(){
+-  const list=loadTrends(); const W=trendCanvas.width,H=trendCanvas.height; gT.fillStyle="#081120"; gT.fillRect(0,0,W,H); gT.strokeStyle="#12243e"; gT.strokeRect(0,0,W,H);
+-  if(list.length<2){ gT.fillStyle="#5b7394"; gT.font="9px sans-serif"; gT.fillText("هنوز روندی ثبت نشده",10,H/2); document.getElementById('trendInfo').textContent=`${list.length} نقطه`; return; }
++  const list=loadTrends(); const W=trendCanvas.width,H=trendCanvas.height; gT.fillStyle="#070d1a"; gT.fillRect(0,0,W,H); gT.strokeStyle="#132340"; gT.strokeRect(0,0,W,H);
++  if(list.length<2){ gT.fillStyle="#60769a"; gT.font="500 10px Inter"; gT.fillText("هنوز روندی ثبت نشده",10,H/2); document.getElementById('trendInfo').textContent=`${list.length} نقطه`; return; }
+   const vals=list.map(x=>x.rms_g); const min=Math.min(...vals)*0.9, max=Math.max(...vals)*1.1, range=max-min||1;
+-  gT.strokeStyle="#0ea5e9"; gT.lineWidth=1.4; gT.beginPath(); list.forEach((p,i)=>{ const x=i/(list.length-1)*(W-10)+5, y=H-6 - (p.rms_g-min)/range*(H-18); if(i===0) gT.moveTo(x,y); else gT.lineTo(x,y); }); gT.stroke();
+-  list.forEach((p,i)=>{ const x=i/(list.length-1)*(W-10)+5, y=H-6 - (p.rms_g-min)/range*(H-18); gT.fillStyle=p.isoZone==='D'?'#ef4444':p.isoZone==='C'?'#f59e0b':'#10b981'; gT.beginPath(); gT.arc(x,y,2.2,0,Math.PI*2); gT.fill(); });
+-  document.getElementById('trendInfo').textContent=`${list.length} نقطه • آخرین ${list[list.length-1].rms_g.toFixed(3)}g • ${list.length>4? ((vals[vals.length-1]-vals[vals.length-5])/vals[vals.length-5]*100).toFixed(1)+'% در 5 اندازه':'—'}`;
++  gT.strokeStyle="#2563eb"; gT.lineWidth=1.4; gT.beginPath(); list.forEach((p,i)=>{ const x=i/(list.length-1)*(W-10)+5, y=H-6 - (p.rms_g-min)/range*(H-18); if(i===0) gT.moveTo(x,y); else gT.lineTo(x,y); }); gT.stroke();
++  list.forEach((p,i)=>{ const x=i/(list.length-1)*(W-10)+5, y=H-6 - (p.rms_g-min)/range*(H-18); gT.fillStyle=p.isoZone==='D'?'#dc2626':p.isoZone==='C'?'#d97706':'#059669'; gT.beginPath(); gT.arc(x,y,2,0,Math.PI*2); gT.fill(); });
++  document.getElementById('trendInfo').textContent=`${list.length} نقطه • آخرین ${list[list.length-1].rms_g.toFixed(3)}g`;
+ }
+ async function loadFile(file){
+   document.getElementById('status').textContent=`خواندن ${file.name}...`;
+   const res=await parseVibrationFile(file); channels=res.channels; header=res.header; viewStart=0; viewLen=Math.min(channels[0].samples.length, header.fs*10);
+-  document.getElementById('fileInfo').innerHTML=`${header.fileName}<br>FS ${header.fs}Hz • ${header.durationSeconds.toFixed(1)}s • ${header.numSamples.toLocaleString('fa-IR')}`;
+-  document.getElementById('status').textContent=`${header.fileName} • ${channels.length}ch`; document.getElementById('aiBtn').disabled=false; document.getElementById('pdfBtn').disabled=false;
++  document.getElementById('fileInfo').innerHTML=`<div style="display:grid;grid-template-columns:80px 1fr;gap:3px"><dt style="color:var(--text-tertiary)">نام</dt><dd>${header.fileName}</dd><dt style="color:var(--text-tertiary)">فرمت</dt><dd>${header.format}</dd><dt style="color:var(--text-tertiary)">FS</dt><dd>${header.fs} Hz</dd><dt style="color:var(--text-tertiary)">مدت</dt><dd>${header.durationSeconds.toFixed(1)}s</dd></div>`;
++  document.getElementById('status').textContent=`${header.fileName} • ${channels.length}ch`; document.getElementById('sbFs').textContent=header.fs+' Hz'; document.getElementById('aiBtn').disabled=false; document.getElementById('pdfBtn').disabled=false;
+   const ch=channels[0]; const crest=ch.peak/(ch.rms+1e-9); let m2=0,m4=0; const mean=ch.samples.reduce((a,b)=>a+b,0)/ch.samples.length; for(let i=0;i<ch.samples.length;i++){const d=ch.samples[i]-mean; m2+=d*d; m4+=d*d*d*d;} m2/=ch.samples.length; m4/=ch.samples.length; const kurt=m4/(m2*m2+1e-12)-3;
+   document.getElementById('mRms').textContent=ch.rms.toFixed(3); document.getElementById('mPeak').textContent=ch.peak.toFixed(2); document.getElementById('mCrest').textContent=crest.toFixed(2); document.getElementById('mKurt').textContent=kurt.toFixed(2);
+   document.getElementById('rms0').textContent=`RMS ${ch.rms.toFixed(3)}`; if(channels[1]) document.getElementById('rms1').textContent=`RMS ${channels[1].rms.toFixed(3)}`;
+   updateISO(); drawWave(); drawSpec(); drawKurtogram(); drawTrend();
+-  // waterfall slice
+-  const spec={ freqs:new Float64Array(256), spectrum:new Float64Array(256).map((_,i)=> Math.random()*0.05) }; waterfall.add({ ts:Date.now(), rpm:currentRPM, spectrum:spec.spectrum, freqs:spec.freqs });
+ }
+ document.getElementById('openBtn').onclick=()=> document.getElementById('fileInput').click();
+ document.getElementById('fileInput').onchange=e=> e.target.files[0] && loadFile(e.target.files[0]);
+-document.getElementById('dropZone').ondragover=e=>{e.preventDefault(); e.currentTarget.style.borderColor='#0ea5e9'};
++document.getElementById('dropZone').ondragover=e=>{e.preventDefault(); e.currentTarget.style.borderColor='var(--accent)'};
+ document.getElementById('dropZone').ondrop=e=>{e.preventDefault(); const f=e.dataTransfer.files[0]; if(f) loadFile(f)};
+ document.getElementById('fitBtn').onclick=()=>{viewStart=0; viewLen=channels[0]?.samples.length||12800*10; drawWave(); drawSpec();};
+ document.getElementById('clearBtn').onclick=()=>{channels=[]; header=null; drawWave(); drawSpec();};
+@@ -247,33 +420,24 @@ document.getElementById('cursorToggle').onchange=drawSpec; document.getElementBy
+ document.getElementById('timeBase').onchange=e=>{if(!header) return; const v=parseFloat(e.target.value); viewLen=v===0? channels[0].samples.length: Math.round(header.fs*v); drawWave(); drawSpec();};
+ waveCanvas.onwheel=e=>{e.preventDefault(); const k=e.deltaY>0?1.2:0.83; viewLen=Math.max(1024,Math.min(channels[0].samples.length,Math.round(viewLen*k))); drawWave(); drawSpec();};
+ document.querySelectorAll('[data-ch]').forEach(el=> el.onchange=drawWave);
+-document.querySelectorAll('.tab').forEach(t=> t.onclick=()=>{ document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); t.classList.add('active'); currentView=t.dataset.view; if(currentView==='cepstrum') drawCepstrum(); else drawSpec(); document.getElementById('specTitle').textContent= currentView==='cepstrum'?'CEPSTRUM — گیربکس': currentView==='waterfall'?'WATERFALL — روند طیف': 'ENVELOPE SPECTRUM'; });
+-document.getElementById('helpBtn').onclick=()=> alert('RotaLab Pro v1.7 Expert\n• Asset Hierarchy\n• ISO 10816-3 Auto\n• Kurtogram • Cepstrum • Waterfall\n• Fluke-style Diagnosis\nDocs: docs/ADVANCED_FEATURES.md');
+-
+-// AI Diagnosis
++document.querySelectorAll('.view-tab').forEach(t=> t.onclick=()=>{ document.querySelectorAll('.view-tab').forEach(x=>x.classList.remove('active')); t.classList.add('active'); const v=t.dataset.view; document.getElementById('specTitle').textContent= v==='cepstrum'?'CEPSTRUM': v==='waterfall'?'WATERFALL':'ENVELOPE SPECTRUM'; if(v==='cepstrum'){ const {quefrency,cep}=computeCepstrum(channels[0]?.samples.slice(viewStart, viewStart+4096)||new Float64Array(0), header?.fs||12800); const W=specCanvas.width,H=specCanvas.height; gS.fillStyle="#070d1a"; gS.fillRect(0,0,W,H); gS.strokeStyle="#8b5cf6"; gS.beginPath(); for(let i=0;i<Math.min(quefrency.length,W);i++){const x=i/W*W, y=H - cep[i]*H*2 -10; if(i===0) gS.moveTo(x,y); else gS.lineTo(x,y);} gS.stroke(); } else drawSpec(); });
++document.getElementById('helpBtn').onclick=()=> alert('RotaLab Studio v1.8\nAsset Hierarchy • ISO 10816-3 • Kurtogram • Cepstrum • Waterfall\nDocs: docs/ADVANCED_FEATURES.md');
+ document.getElementById('aiBtn').onclick=async()=>{
+   const btn=document.getElementById('aiBtn'); btn.disabled=true; btn.textContent='تحلیل...';
+   const ch=channels[0]; let m2=0,m4=0; const mean=ch.samples.reduce((a,b)=>a+b,0)/ch.samples.length; for(let i=0;i<ch.samples.length;i++){const d=ch.samples[i]-mean; m2+=d*d; m4+=d*d*d*d;} m2/=ch.samples.length; m4/=ch.samples.length; const kurt=m4/(m2*m2+1e-12)-3; const crest=ch.peak/(ch.rms+1e-9); const iso=updateISO();
+   let aiFault='Normal', aiConf=0.92;
+   try{ let csv="timestamp_ms,ax_g\n"; for(let i=0;i<Math.min(ch.samples.length,12800*5);i++) csv+=`${(i/ch.sampleRate*1000).toFixed(3)},${ch.samples[i].toFixed(5)}\n`; const fd=new FormData(); fd.append("file", new Blob([csv],{type:"text/csv"}), "s.csv"); const r=await fetch(`http://localhost:8000/infer?rpm=${currentRPM}&fs=${ch.sampleRate}`,{method:"POST",body:fd}); if(r.ok){const d=await r.json(); aiFault=d.fault; aiConf=d.confidence;} }catch(e){}
+   const vel=accToVelocity(ch.rms,100); const diag=diagnose({ rms_g:ch.rms, peak_g:ch.peak, kurt, crest, vel_mm_s:vel, isoZone:iso.zone, aiFault, aiConf, spectrumPeaks:[{freq:calcFaultFreqs(currentBearing,currentRPM).BPFO, amp:0.09, label:'BPFO'}], rpm:currentRPM });
+-  const color=diag.severity==='Extreme'?'#ef4444':diag.severity==='Serious'?'#f59e0b':diag.severity==='Moderate'?'#eab308':'#10b981';
+-  document.getElementById('aiResult').innerHTML=`<div style="border:1px solid ${color}44;background:var(--card);border-radius:9px;overflow:hidden"><div style="padding:7px 9px;display:flex;align-items:center;gap:7px;border-bottom:1px solid var(--border)"><div style="width:26px;height:26px;border-radius:7px;display:grid;place-items:center;background:${color}18;color:${color};border:1px solid ${color}33">${diag.severity==='Slight'?'✓':'!'}</div><div><div style="font-size:12px;font-weight:600;color:${color}">${diag.primaryFault} — ${diag.severityFa}</div><div style="font-size:10px;color:var(--muted)">امتیاز ${diag.score}/100 • ${(aiConf*100).toFixed(0)}%</div></div><span style="margin-right:auto;font-size:9px;background:${color}15;color:${color};border:1px solid ${color}33;padding:2px 6px;border-radius:20px">${diag.severity}</span></div><div style="padding:9px;font-size:11px;line-height:1.6">${diag.evidence.map(e=>`<div style="background:#081120;border:1px solid var(--border);border-radius:6px;padding:5px;margin:4px 0;font-size:10px;color:var(--muted)">• ${e}</div>`).join('')}<div style="background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:6px;margin-top:6px"><div style="font-size:9px;color:var(--muted)">توصیه</div><div style="font-size:11px">${diag.recommendation}</div></div><div style="margin-top:6px;background:rgba(14,165,233,.07);border:1px solid rgba(14,165,233,.14);border-radius:6px;padding:6px;font-size:10px;color:#93b4d7">💡 ${diag.helpTip}</div></div></div>`;
+-  // trending
++  const color=diag.severity==='Extreme'?'#dc2626':diag.severity==='Serious'?'#d97706':diag.severity==='Moderate'?'#eab308':'#059669';
++  document.getElementById('aiResult').innerHTML=`<div style="border:1px solid ${color}30;background:var(--surface);border-radius:9px;overflow:hidden"><div style="padding:8px 10px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border)"><div style="width:26px;height:26px;border-radius:7px;display:grid;place-items:center;background:${color}15;color:${color};border:1px solid ${color}30">${diag.severity==='Slight'?'✓':'!'}</div><div><div style="font:600 12px var(--font-sans);color:${color}">${diag.primaryFault} — ${diag.severityFa}</div><div style="font:500 10px var(--font-mono);color:var(--text-tertiary)">امتیاز ${diag.score}/100 • ${(aiConf*100).toFixed(0)}%</div></div><span style="margin-right:auto;font:600 9px var(--font-mono);background:${color}15;color:${color};border:1px solid ${color}30;padding:2px 7px;border-radius:20px">${diag.severity}</span></div><div style="padding:9px;font:500 11px var(--font-sans);line-height:1.6">${diag.evidence.map(e=>`<div class="evidence">• ${e}</div>`).join('')}<div style="background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:7px;margin-top:6px"><div style="font:600 9px var(--font-sans);color:var(--text-tertiary);letter-spacing:.06em">توصیه</div><div style="font:500 11px var(--font-sans)">${diag.recommendation}</div></div><div class="help-tip" style="margin-top:6px">💡 ${diag.helpTip}</div></div></div>`;
+   addTrend({ ts:Date.now(), dateFa:new Date().toLocaleDateString('fa-IR'), rms_g:ch.rms, peak_g:ch.peak, kurt, vel_mm_s:vel, isoZone:iso.zone, aiFault:diag.primaryFault, aiConf, rpm:currentRPM, fileName:header.fileName }); drawTrend();
+   btn.disabled=false; btn.textContent='تحلیل هوشمند';
+ };
+ document.getElementById('pdfBtn').onclick=async()=>{
+-  // dynamic import to avoid hard dep
+-  const ch=channels[0]; if(!ch) return;
+-  const vel=accToVelocity(ch.rms,100), iso=updateISO();
+-  const data={ plant:'کارخانه نمونه', area:'سالن ۱', machine:document.querySelector('.asset-item.active')?.textContent||'P-101A', point:currentBearing.designation, bearing:currentBearing.designation, rpm:currentRPM, dateFa:new Date().toLocaleDateString('fa-IR'), dateEn:new Date().toISOString().slice(0,10), rms:ch.rms, peak:ch.peak, kurt:parseFloat(document.getElementById('mKurt').textContent)||0, vel, isoZone:iso.zone, fault:document.querySelector('#aiResult')?.textContent?.slice(0,20)||'Outer', severity:iso.zone, score:68, evidence:['ISO Zone '+iso.zone], recommendation:'طبق ISO اقدام شود', fileName:header.fileName, waveDataUrl:waveCanvas.toDataURL(), specDataUrl:specCanvas.toDataURL() };
+-  try{
+-    const mod=await import('./src/core/report.ts'); const doc=mod.generatePDF(data); doc.save(`RotaReport_${Date.now()}.pdf`);
+-  }catch(e){ alert('PDF: jsPDF نصب نیست — window.print()'); window.print(); }
++  const ch=channels[0]; if(!ch) return; const vel=accToVelocity(ch.rms,100), iso=updateISO();
++  try{ const mod=await import('./src/core/report.ts'); const data={ plant:'کارخانه نمونه', area:'سالن ۱', machine:document.querySelector('.asset-row.active')?.textContent?.trim()||'P-101A', point:currentBearing.designation, bearing:currentBearing.designation, rpm:currentRPM, dateFa:new Date().toLocaleDateString('fa-IR'), dateEn:new Date().toISOString().slice(0,10), rms:ch.rms, peak:ch.peak, kurt:parseFloat(document.getElementById('mKurt').textContent)||0, vel, isoZone:iso.zone, fault:document.getElementById('aiResult').textContent.slice(0,20)||'Outer', severity:iso.zone, score:68, evidence:['ISO Zone '+iso.zone], recommendation:'طبق ISO اقدام شود', fileName:header.fileName, waveDataUrl:waveCanvas.toDataURL(), specDataUrl:specCanvas.toDataURL() }; const doc=mod.generatePDF(data); doc.save(`RotaReport_${Date.now()}.pdf`); }catch(e){ window.print(); }
+ };
+-
+-renderAssets(); updateBearingInfo(); updateISO(); drawWave(); drawSpec(); drawTrend(); drawKurtogram();
++renderAssets(); updateBearingInfo(); updateISO(); drawWave(); drawSpec(); drawKurtogram(); drawTrend();
+ fetch("../../datasets/fixtures/sample_bearing_outer.csv").then(r=>r.blob()).then(b=>{ if(b.size>1000){ const f=new File([b],"sample.csv",{type:"text/csv"}); loadFile(f); }}).catch(()=>{});
+ </script>
+ </body>
+-- 
+2.47.3
+

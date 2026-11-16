@@ -1,0 +1,42 @@
+From b831da9af41672fc3bbb40c36cc138f7e145ad53 Mon Sep 17 00:00:00 2001
+From: RotaMind Orchestrator <rotamind@enterprise.local>
+Date: Thu, 12 Nov 2026 12:33:21 +0000
+Subject: [PATCH 09/27] docs: v4.0 changelog
+
+---
+ docs/ENTERPRISE_V4.md | 23 +++++++++++++++++++++++
+ 1 file changed, 23 insertions(+)
+ create mode 100644 docs/ENTERPRISE_V4.md
+
+diff --git a/docs/ENTERPRISE_V4.md b/docs/ENTERPRISE_V4.md
+new file mode 100644
+index 0000000..b8e2e3f
+--- /dev/null
++++ b/docs/ENTERPRISE_V4.md
+@@ -0,0 +1,23 @@
++# RotaMind v4.0 — تمام موارد پیشرفت تخصصی اعمال شد
++
++تاریخ: 2026-11-12 — کامیت 4de5e76
++
++## 12 شکاف Enterprise بسته شد
++
++| # | عنوان | فایل | UI |
++|---|---|---|---|
++| 1 | OPC UA Read-Only Mock | opcua.ts | پنل OPC UA + دکمه اتصال + 4 Node |
++| 2 | RBAC + IEC 62443 | auth.ts | پنل RBAC با select نقش + permBox |
++| 3 | AES-GCM + HMAC | crypto.ts | دکمه رمز روی پنل RBAC |
++| 4 | SAP PM Work Order | sap.ts | پنل SAP WO + ساخت WO خودکار + SOP |
++| 5 | LSTM-RUL با CI | rulAdvanced.ts | ارتقای RUL قبلی |
++| 6 | API 670 Checklist | api670.ts | پنل Checklist 6 ردیفه + Score |
++| 7 | 3D ODS | ods3d.ts | پنل 3D ODS + canvas + CSV import |
++| 8 | TimescaleDB Mock | db.ts | پنل DB + dbCanvas + stats |
++| 9 | Capacitor Native | capacitor.config.json | اپ com.rotamind.enterprise |
++| 10 | BOM Pilot سخت‌افزار | hardware/BOM_PILOT.md | ESP32-S3 + ADXL1002 |
++| 11 | گزارش DOCX Template | reportAdvanced.ts | reportAdvanced HTML |
++| 12 | Report HTML | — | buildReportHTML |
++
++سایر موارد v3.0 (19 قابلیت) پابرجا.
++Zip: RotaMind-MVP-v4.0.zip (13M)
+-- 
+2.47.3
+

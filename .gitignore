@@ -11,3 +11,7 @@ __pycache__/
 results/
 cache/
 .env
+trends.db
+software/rota-inference/model/*.jsonl
+software/rota-inference/model/*.json
+software/rota-inference/model/*.data

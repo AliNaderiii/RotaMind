@@ -1,0 +1,187 @@
+From 07b3e2cea88b58e26712c3a640e75bdd6ce768a1 Mon Sep 17 00:00:00 2001
+From: RotaMind Orchestrator <rotamind@enterprise.local>
+Date: Sat, 14 Nov 2026 11:47:17 +0000
+Subject: [PATCH 15/27] =?UTF-8?q?feat(ui):=20v9=20organized=20=E2=80=94=20?=
+ =?UTF-8?q?dropdown=20menus=20+=20accordion=20groups=20for=20tidy,=20profe?=
+ =?UTF-8?q?ssional=20layout?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ software/rotaviewer/index.html | 112 ++++++++++++++++++++++++++++-----
+ 1 file changed, 97 insertions(+), 15 deletions(-)
+
+diff --git a/software/rotaviewer/index.html b/software/rotaviewer/index.html
+index 7cb431b..3297511 100644
+--- a/software/rotaviewer/index.html
++++ b/software/rotaviewer/index.html
+@@ -57,25 +57,57 @@ body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--tex
+ canvas{display:block;width:100%}
+ kbd{font:600 10px JetBrains Mono;background:var(--bg);border:1px solid var(--border);border-bottom-width:2px;border-radius:4px;padding:1px 5px;color:var(--muted)}
+ .statusbar{height:22px;background:#0a1628;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;padding:0 10px;font:500 10px JetBrains Mono;color:var(--muted);flex-shrink:0}
++/* ── Dropdown & Accordion (v9 Organized) ── */
++.dropdown{position:relative;display:inline-flex}
++.dropdown-menu{position:absolute;top:110%;right:0;min-width:200px;background:var(--panel);border:1px solid var(--border2);border-radius:10px;padding:6px;box-shadow:0 16px 40px rgba(0,0,0,.45);display:none;z-index:40;flex-direction:column;gap:2px}
++.dropdown.open .dropdown-menu{display:flex}
++.dropdown-item{height:28px;display:flex;align-items:center;gap:8px;padding:0 10px;border-radius:7px;font:500 11px Inter;color:var(--text);cursor:pointer}
++.dropdown-item:hover{background:var(--card);border:1px solid var(--border)}
++.dropdown-sep{height:1px;background:var(--border);margin:4px 0}
++.accordion{border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--panel)}
++.accordion-head{height:32px;display:flex;align-items:center;gap:8px;padding:0 10px;cursor:pointer;background:var(--card);border-bottom:1px solid transparent;font:600 11px Inter;color:var(--text)}
++.accordion-head:hover{background:var(--card2)}
++.accordion-head .arrow{margin-right:auto;transition:transform .2s;font-size:10px;color:var(--muted)}
++.accordion.open .arrow{transform:rotate(180deg)}
++.accordion-body{display:none;padding:8px;flex-direction:column;gap:8px;background:var(--panel)}
++.accordion.open .accordion-body{display:flex}
++.accordion-count{font:600 9px JetBrains Mono;background:var(--bg);border:1px solid var(--border);padding:2px 6px;border-radius:20px;color:var(--muted)}
+ </style>
+ </head>
+ <body>
+ <div class="topbar">
+   <div class="brand">RM</div>
+   <div class="breadcrumb"><b>RotaMind</b><i>›</i><span>Enterprise</span><i>›</i><span id="bcAsset">C-101 / DE</span></div>
+-  <button class="btn primary" id="openBtn">📂 باز کردن</button>
+   <input type="file" id="fileInput" accept=".edf,.csv,.txt" hidden>
+-  <button class="btn" id="wizardBtn">🧭 ویزارد</button>
+-  <button class="btn" id="assetBtn">🏭 دارایی‌ها</button>
+-  <button class="btn" id="routeBtn">🗺 مسیر</button>
+-  <button class="btn" id="balanceBtn">⚖ بالانس</button>
+-  <button class="btn" id="odsBtn">🧩 ODS/Phase</button>
+-  <button class="btn" id="ods3dBtn">🧊 3D ODS</button>
+-  <button class="btn" id="opcBtn">🔗 OPC UA</button>
+-  <button class="btn" id="woBtn">📦 SAP WO</button>
+-  <button class="btn" id="api670Btn">✓ API 670</button>
+-  <button class="btn" id="fleetBtn">🌍 Fleet</button>
+-  <button class="btn" id="hdBtn">📡 HD ENV</button>
++  <!-- Dropdown: فایل -->
++  <div class="dropdown" id="ddFile"><button class="btn primary">📂 فایل ▾</button><div class="dropdown-menu">
++    <div class="dropdown-item" id="openBtn">📂 باز کردن EDF/CSV</div>
++    <div class="dropdown-item" id="saveBaselineBtn2">📌 ذخیره مبنا</div>
++    <div class="dropdown-item" id="clearBaselineBtn2">🗑 حذف مبنا</div>
++    <div class="dropdown-sep"></div><div class="dropdown-item" id="pdfBtn2">📄 خروجی PDF</div>
++  </div></div>
++  <!-- Dropdown: ابزار -->
++  <div class="dropdown" id="ddTools"><button class="btn">🧰 ابزار ▾</button><div class="dropdown-menu">
++    <div class="dropdown-item" id="wizardBtn2">🧭 ویزارد ماشین</div>
++    <div class="dropdown-item" id="assetBtn">🏭 سلسله‌مراتب دارایی</div>
++    <div class="dropdown-item" id="routeBtn">🗺 مدیریت مسیر</div>
++    <div class="dropdown-sep"></div>
++    <div class="dropdown-item" id="balanceBtn">⚖ بالانس (ISO 1940)</div>
++    <div class="dropdown-item" id="odsBtn">🧩 ODS/Phase</div>
++    <div class="dropdown-item" id="ods3dBtn">🧊 3D ODS</div>
++    <div class="dropdown-item" id="hdBtn">📡 HD ENV / SPM HD</div>
++  </div></div>
++  <!-- Dropdown: سازمانی -->
++  <div class="dropdown" id="ddEnt"><button class="btn">🏢 سازمانی ▾</button><div class="dropdown-menu">
++    <div class="dropdown-item" id="opcBtn">🔗 OPC UA</div>
++    <div class="dropdown-item" id="woBtn">📦 SAP Work Order</div>
++    <div class="dropdown-item" id="fleetBtn">🌍 Fleet Manager</div>
++    <div class="dropdown-item" id="api670Btn">✓ API 670 Checklist</div>
++    <div class="dropdown-sep"></div>
++    <div class="dropdown-item" id="fleetBtn2">📊 داشبورد ناوگان</div>
++  </div></div>
++  <!-- hidden legacy triggers -->
++  <button class="btn" id="wizardBtn" style="display:none">🧭 ویزارد</button>
+   <div style="margin-right:auto;display:flex;gap:6px;align-items:center">
+     <span class="badge" id="offlineBadge">● آفلاین</span>
+     <span style="font:500 10px Inter;color:var(--muted)">v3.0 Enterprise</span>
+@@ -151,14 +183,30 @@ kbd{font:600 10px JetBrains Mono;background:var(--bg);border:1px solid var(--bor
+     <div class="card" id="kurtCard" style="display:none"><div class="card-h"><span>Kurtogram — باند بهینه Envelope</span><small id="kurtInfo">—</small></div><div style="padding:10px;display:grid;grid-template-columns:1fr 260px;gap:10px"><canvas id="kurtCanvas" width="600" height="110" style="border:1px solid var(--border);border-radius:8px;background:#070d1a"></canvas><div id="kurtBox" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px;font:500 11px Inter;color:var(--muted)">—</div></div></div>
+   </div>
+   <div class="right" id="right">
+-    <div class="panel" style="display:grid;grid-template-columns:36px 1fr;gap:10px;align-items:center"><div id="isoLight" style="width:36px;height:36px;border-radius:8px;display:grid;place-items:center;border:1.5px solid var(--border);background:var(--bg);font:700 11px JetBrains Mono">—</div><div><div id="isoZone" style="font:600 12px Inter">—</div><div id="isoVel" style="font:500 10px JetBrains Mono;color:var(--muted)">—</div><div id="isoAction" style="font:500 10px Inter;color:var(--muted)">—</div></div></div>
+-    <div class="panel"><h3>شاخص‌ها</h3><div class="kpi"><div><label>RMS</label><div><b id="mRms">—</b> <small style="color:var(--muted)">g</small></div></div><div><label>Peak</label><div><b id="mPeak">—</b></div></div><div><label>Crest</label><div><b id="mCrest">—</b></div></div><div><label>Kurtosis</label><div><b id="mKurt">—</b></div></div></div><div id="bearingInfo" style="margin-top:6px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px;font:500 10px JetBrains Mono;color:var(--muted)">—</div><div id="kurtSuggest" style="margin-top:6px;font:500 10px Inter;padding:7px;background:rgba(37,99,235,.06);border:1px solid rgba(37,99,235,.14);border-radius:8px;color:#93b4d7">Kurtogram: —</div></div>
+-    <div class="panel"><h3>🚨 Alarm Manager <span style="margin-right:auto;font:500 10px Inter;color:var(--muted)">Emerson Alarm Sets</span></h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px"><label style="font:500 10px Inter;color:var(--muted)">Vel Warn<input id="almVelW" class="input" value="1.8" style="width:100%"></label><label style="font:500 10px Inter;color:var(--muted)">Vel Danger<input id="almVelD" class="input" value="4.5" style="width:100%"></label><label style="font:500 10px Inter;color:var(--muted)">Kurt Warn<input id="almKurtW" class="input" value="4" style="width:100%"></label><label style="font:500 10px Inter;color:var(--muted)">Kurt Danger<input id="almKurtD" class="input" value="6" style="width:100%"></label></div><button class="btn small" id="saveAlmBtn" style="width:100%;margin-top:6px">ذخیره آستانه‌ها</button><div id="almStatus" style="font:500 11px Inter;margin-top:6px;color:var(--muted)">—</div></div>
++    <!-- Accordion Group 1 — وضعیت (همیشه باز) -->
++    <div class="accordion open" data-group="status">
++      <div class="accordion-head">📊 وضعیت و شاخص‌ها <span class="accordion-count">ISO 10816</span><span class="arrow">▾</span></div>
++      <div class="accordion-body">
++        <div class="panel" style="display:grid;grid-template-columns:36px 1fr;gap:10px;align-items:center"><div id="isoLight" style="width:36px;height:36px;border-radius:8px;display:grid;place-items:center;border:1.5px solid var(--border);background:var(--bg);font:700 11px JetBrains Mono">—</div><div><div id="isoZone" style="font:600 12px Inter">—</div><div id="isoVel" style="font:500 10px JetBrains Mono;color:var(--muted)">—</div><div id="isoAction" style="font:500 10px Inter;color:var(--muted)">—</div></div></div>
++        <div class="panel"><h3>شاخص‌ها</h3><div class="kpi"><div><label>RMS</label><div><b id="mRms">—</b> <small style="color:var(--muted)">g</small></div></div><div><label>Peak</label><div><b id="mPeak">—</b></div></div><div><label>Crest</label><div><b id="mCrest">—</b></div></div><div><label>Kurtosis</label><div><b id="mKurt">—</b></div></div></div><div id="bearingInfo" style="margin-top:6px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px;font:500 10px JetBrains Mono;color:var(--muted)">—</div><div id="kurtSuggest" style="margin-top:6px;font:500 10px Inter;padding:7px;background:rgba(37,99,235,.06);border:1px solid rgba(37,99,235,.14);border-radius:8px;color:#93b4d7">Kurtogram: —</div></div>
++        <div class="panel"><h3>🚨 Alarm Manager <span style="margin-right:auto;font:500 10px Inter;color:var(--muted)">Emerson Alarm Sets</span></h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px"><label style="font:500 10px Inter;color:var(--muted)">Vel Warn<input id="almVelW" class="input" value="1.8" style="width:100%"></label><label style="font:500 10px Inter;color:var(--muted)">Vel Danger<input id="almVelD" class="input" value="4.5" style="width:100%"></label><label style="font:500 10px Inter;color:var(--muted)">Kurt Warn<input id="almKurtW" class="input" value="4" style="width:100%"></label><label style="font:500 10px Inter;color:var(--muted)">Kurt Danger<input id="almKurtD" class="input" value="6" style="width:100%"></label></div><button class="btn small" id="saveAlmBtn" style="width:100%;margin-top:6px">ذخیره آستانه‌ها</button><div id="almStatus" style="font:500 11px Inter;margin-top:6px;color:var(--muted)">—</div></div>
++      </div>
++    </div>
++    <!-- Accordion Group 2 — تشخیص -->
++    <div class="accordion" data-group="diagnosis">
++      <div class="accordion-head">🧠 تشخیص و RUL <span class="accordion-count">AI + HD ENV</span><span class="arrow">▾</span></div>
++      <div class="accordion-body">
+     <div class="panel"><h3>روند Envelope <span style="margin-right:auto;color:var(--dim);font:500 10px Inter">OPTIME ExpertViewer</span></h3><canvas id="envelopeTrendCanvas" width="340" height="70" style="background:var(--card);border:1px solid var(--border);border-radius:8px"></canvas></div>
+     <div class="panel"><h3>⏳ RUL — عمر باقی‌مانده <span style="margin-right:auto;color:var(--dim);font:500 10px Inter">Schaeffler OPTIME AI</span></h3><div id="rulBox" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px;font:500 11px Inter;color:var(--muted)">برای پیش‌بینی حداقل ۵ تحلیل نیاز است</div><canvas id="rulCanvas" width="340" height="70" style="background:var(--card);border:1px solid var(--border);border-radius:8px;margin-top:6px"></canvas></div>
+     <div class="panel"><h3>⚡ MCSA — جریان موتور</h3><div style="display:flex;gap:6px"><input id="mcsaSlip" class="input" value="0.02" style="width:80px"><span style="font:500 10px Inter;color:var(--muted);align-self:center">Slip</span><button class="btn small" id="mcsaBtn">تحلیل MCSA</button></div><div id="mcsaBox" style="margin-top:6px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px;font:500 11px Inter;color:var(--muted)">—</div></div>
+     <div class="panel"><h3>📋 گزارش خودکار <button class="btn small" id="copyReportBtn" style="margin-right:auto">کپی</button></h3><div id="reportBox" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px;font:500 11px Inter;color:var(--muted);white-space:pre-wrap;max-height:140px;overflow:auto">—</div><button class="btn small" id="pdfBtn" style="width:100%;margin-top:6px">📄 خروجی PDF حرفه‌ای</button></div>
+     <div class="panel"><h3>تشخیص</h3><div id="aiResult" style="background:var(--card);border:1px dashed var(--border);border-radius:9px;padding:10px;text-align:center;color:var(--muted);font:500 11px Inter">فایل را باز کنید</div></div>
++      </div>
++    </div>
++    <!-- Accordion Group 3 — مسیر و روند -->
++    <div class="accordion" data-group="route">
++      <div class="accordion-head">🗺 مسیر و روند <span class="accordion-count">Route + Trend</span><span class="arrow">▾</span></div>
++      <div class="accordion-body">
+     <div class="panel"><h3>مسیر — Route Manager <span id="routePct" style="margin-right:auto" class="badge">—</span></h3><div id="routeBox" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px;max-height:140px;overflow:auto;font:500 11px Inter;color:var(--muted)">مسیر فعالی نیست — از ویزارد بسازید</div><div style="display:flex;gap:6px;margin-top:6px"><button class="btn small" id="routeDoneBtn">✓ تکمیل نقطه</button><button class="btn small" id="routeExportBtn">CSV</button></div></div>
+     <div class="panel"><h3>روند RMS ۳۰ روز</h3><canvas id="trendCanvas" width="340" height="80" style="background:var(--card);border:1px solid var(--border);border-radius:8px"></canvas><div style="display:flex;gap:6px;margin-top:6px"><button class="btn small" id="clearTrendBtn">پاک</button><button class="btn small" id="exportTrendBtn">CSV</button><span id="trendInfo" style="font:500 10px Inter;color:var(--muted);margin-right:auto">—</span></div></div>
+     <div class="panel"><h3>🔐 RBAC + IEC 62443 <span style="margin-right:auto" class="badge" id="roleBadge">viewer</span></h3><div style="display:flex;gap:6px"><select id="roleSelect" class="select" style="flex:1"><option value="viewer">Viewer</option><option value="analyst" selected>Analyst</option><option value="supervisor">Supervisor</option><option value="admin">Admin</option></select><button class="btn small" id="encryptBtn">🔒 رمز</button></div><div id="permBox" style="margin-top:6px;font:500 10px Inter;color:var(--muted)">—</div></div>
+@@ -167,6 +215,12 @@ kbd{font:600 10px JetBrains Mono;background:var(--bg);border:1px solid var(--bor
+     <div class="panel"><h3>📦 SAP WO — Work Order</h3><div id="woBox" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px;font:500 11px Inter;color:var(--muted)">—</div><button class="btn small" id="createWoBtn" style="width:100%;margin-top:6px">ساخت WO خودکار</button></div>
+     <div class="panel"><h3>✓ API 670 Checklist <span id="api670Score" class="badge" style="margin-right:auto">—</span></h3><div id="api670Box" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px;font:500 10px Inter;color:var(--muted);max-height:110px;overflow:auto">—</div></div>
+     <div class="panel"><h3>🗄 TimescaleDB Mock <span id="dbStats" class="badge" style="margin-right:auto">0 rows</span></h3><canvas id="dbCanvas" width="340" height="60" style="background:var(--card);border:1px solid var(--border);border-radius:8px"></canvas></div>
++      </div>
++    </div>
++    <!-- Accordion Group 4 — سازمانی -->
++    <div class="accordion" data-group="enterprise">
++      <div class="accordion-head">🏢 سازمانی و امنیت <span class="accordion-count">RBAC + OPC + SAP</span><span class="arrow">▾</span></div>
++      <div class="accordion-body">
+     <div class="panel"><h3>🔬 Enterprise Plus — Ultrasonic / Acoustic / Twin / Env</h3>
+       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+         <button class="btn small" id="ultraBtn">Ultrasonic</button>
+@@ -185,6 +239,12 @@ kbd{font:600 10px JetBrains Mono;background:var(--bg);border:1px solid var(--bor
+       <div id="plusBox" style="margin-top:6px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px;font:500 11px Inter;color:var(--muted);min-height:48px">—</div>
+       <div style="margin-top:6px;display:flex;gap:6px"><span style="font:500 10px Inter;color:var(--muted)">یاتاقان گسترده (40):</span><select id="bearingExtSelect" class="select" style="flex:1"><option>6208</option><option>6309</option><option>6311</option><option>22210</option><option>30206</option></select><span id="bearingExtInfo" style="font:500 10px JetBrains Mono;color:var(--muted)">—</span></div>
+     </div>
++      </div>
++    </div>
++    <!-- Accordion Group 5 — پیشرفته -->
++    <div class="accordion" data-group="advanced">
++      <div class="accordion-head">🔬 پیشرفته — SPM / Laser / Fleet / Physics <span class="accordion-count">Expert</span><span class="arrow">▾</span></div>
++      <div class="accordion-body">
+     <div class="panel"><h3>📡 SPM HD / HD ENV — Real Peak dB <span class="badge" style="margin-right:auto;background:var(--warn);color:#fff">SPM</span></h3>
+       <div style="display:flex;gap:6px"><button class="btn small" id="hdEnvBtn" style="flex:1">HD ENV</button><button class="btn small" id="spmHdBtn" style="flex:1">SPM HD</button><button class="btn small" id="evamBtn">EVAM</button></div>
+       <div id="hdBox" style="margin-top:6px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px;font:500 11px Inter;color:var(--muted)">—</div>
+@@ -228,6 +288,14 @@ kbd{font:600 10px JetBrains Mono;background:var(--bg);border:1px solid var(--bor
+     </div>
+     <div class="panel"><h3>🔗 Blockchain Audit <span class="badge" style="margin-right:auto;background:var(--success);color:#fff">Immutable</span></h3><div id="chainBox" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px;font:500 10px JetBrains Mono;color:var(--muted);max-height:70px;overflow:auto">—</div><button class="btn small" id="addBlockBtn" style="width:100%;margin-top:6px">افزودن بلاک</button></div>
+     <div class="panel"><h3>ممیزی — Audit Trail <span style="margin-right:auto" class="badge">ISO 18436</span></h3><div id="auditBox" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px;max-height:100px;overflow:auto;font:500 10px JetBrains Mono;color:var(--muted)">—</div><div style="display:flex;gap:6px;margin-top:6px"><button class="btn small" id="exportAuditBtn">CSV</button><button class="btn small" id="clearAuditBtn">پاک</button></div></div>
++      </div>
++    </div>
++    <!-- Accordion Group 6 — روندها -->
++    <div class="accordion" data-group="trends">
++      <div class="accordion-head">📈 روندها و آرشیو <span class="accordion-count">Envelope + Blockchain</span><span class="arrow">▾</span></div>
++      <div class="accordion-body" style="display:none">
++      </div>
++    </div>
+   </div>
+ </div>
+ <div class="statusbar"><span id="statusText">آماده — فایل EDF/CSV را باز کنید</span><span style="margin-right:auto" id="statusHint"><kbd>?</kbd> راهنما</span><span id="recStatus">—</span></div>
+@@ -468,6 +536,20 @@ $('flirBtn').onclick=()=>{ const max=58.2; const c=$('flirCanvas'),g=c.getContex
+ $('beamBtn').onclick=()=>{ $('finalBox').innerHTML='Beamforming 4-mic array: -60° 0.2, -30° 0.4, <b>0° 0.82 نشتی</b>, 30° 0.3, 60° 0.2 — Source @ 0° — Brüel & Kjær'; };
+ $('copilotBtn').onclick=()=>{ const b=$('copilotBox'); b.style.display=b.style.display==='none'?'block':'none'; };
+ $('copilotInput').addEventListener('keydown',e=>{ if(e.key==='Enter'){ const q=e.target.value; const ctx={rms:channels[0]?.rms||0.4, kurt:4.2, fault:'BPFO'}; let ans=''; const l=q.toLowerCase(); if(l.includes('bpfo')) ans=`BPFO Outer race — فرکانس 152Hz — Kurtosis ${ctx.kurt} → آسیب — اقدام: بازرسی`; else if(l.includes('rul')) ans=`RUL 20-40 روز تا Danger — روند نزولی`; else ans=`RMS ${ctx.rms}g — ${ctx.fault} — پیشنهاد پایش ماهانه — Copilot (Ollama آفلاین)`; $('copilotAns').textContent=ans; logAudit(currentRole,'copilot',q); }});
++// ── Dropdown & Accordion Logic (v9 Organized) ──
++document.querySelectorAll('.dropdown > button').forEach(btn=>{
++  btn.addEventListener('click', e=>{ e.stopPropagation(); const dd=btn.parentElement; const wasOpen=dd.classList.contains('open'); document.querySelectorAll('.dropdown').forEach(d=>d.classList.remove('open')); if(!wasOpen) dd.classList.add('open'); });
++});
++document.addEventListener('click', ()=> document.querySelectorAll('.dropdown').forEach(d=>d.classList.remove('open')));
++document.querySelectorAll('.accordion-head').forEach(head=>{
++  head.addEventListener('click', ()=> head.parentElement.classList.toggle('open'));
++});
++// Map dropdown2 legacy buttons
++if($('saveBaselineBtn2')) $('saveBaselineBtn2').onclick=()=> $('saveBaselineBtn').click();
++if($('clearBaselineBtn2')) $('clearBaselineBtn2').onclick=()=> $('clearBaselineBtn').click();
++if($('pdfBtn2')) $('pdfBtn2').onclick=()=> $('pdfBtn').click();
++if($('wizardBtn2')) $('wizardBtn2').onclick=()=> $('wizardBtn').click();
++if($('fleetBtn2')) $('fleetBtn2').onclick=()=> $('fleetBtn').click();
+ // DSP Pro
+ $('applyDspBtn').onclick=()=>{ const win=$('winSelect').value, lines=$('linesSelect').value, overlap=$('overlapSelect').value, avg=$('avgSelect').value; const corr={Uniform:1, Hann:2, Hamming:1.85, Flattop:4.6}[win]||1; $('dspBox').innerHTML=`Window <b>${win}</b> AmpCorr ${corr}× | Lines ${lines} | Overlap ${overlap}% → ${Math.ceil(4096/4096*(1 - parseInt(overlap)/100))} blocks | Avg ${avg} — Crystal CoCo style`; logAudit(currentRole,'dsp', win+' '+lines); if(channels.length) drawSpec(); };
+ $('demodBtn').onclick=()=>{ const bands=[[125,1440],[4000,8000],[8000,16000],[32000,46080]]; const b=bands[Math.floor(Math.random()*bands.length)]; $('dspBox').innerHTML=`Demodulation band ${b[0]}–${b[1]} Hz (24 options) → Envelope applied — Dewesoft style`; };
+-- 
+2.47.3
+
